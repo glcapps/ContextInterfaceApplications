@@ -1,8 +1,6 @@
-# Context Interface Applications
+# Context Interface Applications, The Interface Moves Inside the Model
 
-## The Interface Moves Inside the Model
-
-### Framing the Shift
+## Framing the Shift
 	1.	From UI to Context: Where the Interface Went
 
 	Interfaces relocated from UI/API surfaces to the context window. The model only perceives what is included, ordered, emphasized, and refreshed in context; everything else is absent. This is equivalent to viewport + request scope + working memory. Application design still applies: define visible state, constrain actions, sequence workflows, control transitions, and decide which facts persist across steps. Context is an interface surface, not an incidental payload. The shift is not from engineering to prompting; it is from human-facing interface design to model-facing interface design. The system no longer renders for humans first; it renders for the model and optionally for humans. Good business software orients users toward correct decisions by highlighting what matters, constraining options, and guiding the next step; context interfaces apply the same discipline to agents.
@@ -19,7 +17,7 @@
 
 	Current LLM systems feel wrong because structure is implicit and scattered. Prompts mix state, instructions, and logic; orchestration loops replace architecture; tool use is loosely scoped; context is opaque; ownership is unclear. This resembles pre-framework web development: string assembly, hidden state, weak boundaries, and hard-to-replay behavior. The discomfort is valid. The missing piece is a first-class interface layer where structure, constraints, state, and transitions are explicit and inspectable.
 
-### The Hidden Structure of Today’s Systems
+## The Hidden Structure of Today’s Systems
 	5.	Implicit Constraints: Where They Actually Live Today
 
 	Current systems are already constrained, but the constraints are fragmented and implicit. Prompts encode rules, orchestration code enforces sequence, tool schemas gate actions, validators reject outputs, memory layers shape state, and retries mask inconsistency. These constraints are not unified or inspectable, making behavior hard to reason about, test, or version. The system’s actual architecture is distributed across these layers. The problem is not lack of constraint, but lack of a single, explicit interface where constraints, state, and workflow are declared and visible.
@@ -36,7 +34,7 @@
 
 	Debugging fails because the interface is not inspectable. The critical artifact is the exact context seen by the model, including order, omissions, freshness, tool availability, and prior outputs. Current practice logs prompts and outputs but lacks diffing, step replay, node-level inspection, and state correlation. Effective debugging requires: snapshotting context per step, comparing variants, tracing tool decisions, replaying transitions, and correlating outcomes to context, schema, and state changes. Treat context like a DOM with devtools, versions, and render traces. Replay, diff, and regression belong to the harness, not just to model evaluation, because inspectability is part of the design problem.
 
-### Model vs Harness: The Emerging Split
+## Model vs Harness: The Emerging Split
 	9.	Model Development vs Harness Development
 
 	Two layers are emerging. Model development increases capability (reasoning, context size, multimodality, efficiency). Harness development increases reliability (context construction, workflow, state, tools, replay). Systems fail when capability is high but structure is weak. Progress now depends on harness quality: explicit context, scoped actions, controlled progression, and inspectable state. These layers are coupled but require different skills, artifacts, metrics, and release cycles. Application discipline becomes operational in the harness layer.
@@ -53,7 +51,7 @@
 
 	The harness becomes a first-class layer responsible for context construction, workflow control, state synchronization, tool execution, replay, and policy enforcement. It defines the context interface, enforces constraints, and coordinates steps. This is application engineering applied to agent environments. Artifacts include context schemas, workflow graphs, state models, projection rules, and execution policies. Skills shift from prompt tuning to interface and system design. The practical question is no longer only how to call the model, but how to build the environment it operates within; harness quality governs reliability more directly than model capability alone.
 
-### Context Interface Applications
+## Context Interface Applications
 	13.	What Is a Context Interface Application?
 
 	A Context Interface Application designs the model’s working context as the primary interface. It defines what is visible, how it is structured, what actions are allowed, how workflows advance, and which state persists across steps. The system renders context per step, not a single static prompt. State, tools, goals, constraints, and transitions are explicit nodes, not implicit text. The application surface is the composed context, not just UI or API endpoints.
@@ -70,7 +68,7 @@
 
 	Constraints define behavior. Limit actions to scoped tools, gate inputs with schemas, fix workflow steps where repeatability matters, and make state explicit. Prefer whitelists over open text, explicit transitions over free-form reasoning, and small, local contexts over global blobs. Encode invariants in step definitions, tool contracts, and projection rules. Reliability comes from reducing the action space and clarifying state, not from stronger prompts. Flexibility can remain where applications need it, but it should appear as controlled branching rather than unrestricted exposure.
 
-### DOM Thinking for Agents (ForageMap Perspective)
+## DOM Thinking for Agents (ForageMap Perspective)
 	17.	Dual DOM Architecture: Human vs Machine Interfaces
 
 	Maintain dual interfaces from shared state: human DOM and machine (context) DOM. Each renders a different surface with the same intent but different consumers. Synchronize updates, avoid drift, define which changes originate where, and control projection between the two. The machine DOM encodes workflow, state, constraints, and allowed actions; the human DOM presents controls, status, and feedback. Consistency requires explicit mapping between nodes, events, and transitions.
@@ -87,7 +85,7 @@
 
 	Tools are constrained interaction surfaces, not just capabilities. Define inputs, outputs, side effects, permissions, and failure modes; expose only relevant tools per step; encode intent in schemas. Invocation is selection within the interface, not free-form text. Treat tools like components with contracts, validation, lifecycle, logging, and replay. Good tool design narrows action space and clarifies outcomes.
 
-### Core Design Questions
+## Core Design Questions
 	21.	Where Does State Live?
 
 	State exists in three places: persisted system state, application runtime state, and model-visible context. The model’s effective state is only what is present in context at a given step. Synchronization requires selecting, transforming, filtering, and ordering subsets of system state into context per step. Avoid leaking full state; prefer minimal, task-scoped views with explicit freshness and provenance. Treat context as a projected state, not the source of truth. If a fact must not vary, keep it in code or canonical state; if it must be seen to act on it, project it into context.
@@ -104,7 +102,7 @@
 
 	Ownership of the context interface spans backend, product, workflow, and application design, but the interface itself needs a single authority. Define ownership for context schemas, step definitions, projection rules, and tool contracts; other layers contribute data but do not reshape structure ad hoc. Treat context as a versioned interface with reviews, tests, diffs, and release discipline. Avoid prompt edits as an ungoverned side channel. Without ownership, hidden constraints reappear, state projection drifts, and debugging loses a stable target.
 
-### Failure Modes and Pressure Points
+## Failure Modes and Pressure Points
 	25.	Context Bloat vs Context Loss
 
 	Context bloat and context loss are opposing failure modes. Over-inclusion dilutes signal, increases interference, raises cost, and slows iteration; under-inclusion omits required state and causes incorrect reasoning or invalid actions. Design per-step context with minimal sufficient data, ordered by importance and role. Use summaries for history, not raw logs. Treat inclusion as a budgeted architectural decision, not a convenience. Good signs are step-local state, explicit action scope, and visible constraints; warning signs are giant accumulated prompts, hidden rules, and all tools exposed at once.
@@ -121,7 +119,7 @@
 
 	Misinterpretation often indicates interface failure. If the model selects invalid actions, ignores constraints, or misreads state, the interface did not make them salient, local, or unambiguous. Strengthen by reducing options, clarifying schemas, ordering for attention, restating invariants, and tightening step scope. Treat errors as design feedback on context composition, not only as model weakness. When behavior is wrong, inspect what was visible, emphasized, and omitted before blaming reasoning quality.
 
-### Counterintuitive Realities
+## Counterintuitive Realities
 	29.	More Context Can Reduce Accuracy
 
 	More context increases interference. Irrelevant tokens compete for attention, shift weighting, blur task boundaries, and degrade selection of correct actions. Larger windows encourage accumulation of stale state, competing alternatives, and low-value history. Prefer minimal, task-scoped context; summarize history; exclude alternatives unless required. Measure by outcome accuracy per step, retry rate, and decision clarity, not by total information included.
@@ -154,7 +152,7 @@
 
 	Efforts to extract determinism from the model (schemas, retries, guardrails, sampler tuning) are reactive and partial. Place predictability in the interface: fixed step graphs, scoped tools, explicit state, ordered context, bounded transitions, and enforced invariants. Too much effort is spent tuning the model layer for behavior that should be designed into the harness. Define what must be visible, what actions are valid, what state carries forward, and what exits a step. Control inputs and action space; do not rely on model tuning for correctness.
 
-### Toward a New Discipline
+## Toward a New Discipline
 	37.	Context Interface Design as a Field
 
 	Context Interface Design becomes a distinct discipline alongside UI and API design. It defines schemas for context nodes, composition rules, ordering strategies, projection rules, and state lifecycle across steps. Core artifacts include context schemas, workflow graphs, render policies, and replay traces. The goal is predictable agent behavior through structured interfaces, not better prompts alone. Evaluation follows the same discipline: inspectability, replayability, drift resistance, and clarity of action boundaries. Good designs make the next valid action legible and invalid actions structurally difficult.
@@ -171,7 +169,7 @@
 
 	Application developers provide the missing discipline: state modeling, workflow design, constraint definition, interface clarity, testing, and release control. Their experience with unreliable human behavior maps to probabilistic agents: constrain choices, expose state, localize decisions, and design for failure. The opportunity is not to learn ML internals first, but to apply established engineering practices to the context interface and harness layers.
 
-### Technology Stack and Runtime Surfaces
+## Technology Stack and Runtime Surfaces
 	41.	What Runs the Human UI?
 
 	Human UI remains necessary for input, feedback, supervision, and exception handling. Any SPA framework is suitable if it exposes shared state, events, and deterministic render behavior. Prioritize clear state display, explicit actions, step alignment with the context interface, and visibility into workflow position. Avoid duplicating logic; UI reflects and triggers state used to build context. One system can render multiple interfaces, but shared state and explicit projection must keep them coherent. Human-facing affordances and agent-facing affordances should diverge only by projection, not by hidden business logic.
@@ -196,7 +194,7 @@
 
 	Tool execution spans APIs, SQL, scripts, components, and local or remote services. Define contracts (inputs, outputs, side effects, failure modes), validate inputs, scope availability per step, and isolate execution where needed. Enforce idempotency, timeouts, permissions, retries, and audit logs. Surface results, errors, metadata, and resulting state changes as structured nodes for subsequent steps. Tools are execution surfaces inside the interface, not free-form escapes from it. A well-formed tool narrows choices, makes side effects legible, and returns state in a form the next step can safely consume.
 
-### Forward Outlook
+## Forward Outlook
 	47.	Standardizing Context Interfaces
 
 	Standardization should focus on schemas, lifecycle semantics, render expectations, and repeatable patterns, not rigid protocols. Define common node types (goal, state, tool, step, constraint), composition rules, projection rules, and versioning. Enable interoperability via adapters, schema evolution, and shared inspection tooling. Avoid locking formats early; converge on patterns proven by production workflows, debugging needs, and replay requirements. Shared practice and comparable artifacts matter more than premature canon. Standardization should preserve application-specific goals while stabilizing the recurring engineering surface.
