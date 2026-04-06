@@ -1,47 +1,47 @@
 # Context Interface Applications, The Interface Moves Inside the Model
 
 ## Framing the Shift
-	1.	From UI to Context: Where the Interface Went
+	1. From UI to Context: Where the Interface Went
 
 	Interfaces relocated from UI/API surfaces to the context window. The model only perceives what is included, ordered, emphasized, and refreshed in context; everything else is absent. This is equivalent to viewport + request scope + working memory. Application design still applies: define visible state, constrain actions, sequence workflows, control transitions, and decide which facts persist across steps. Context is an interface surface, not an incidental payload. The shift is not from engineering to prompting; it is from human-facing interface design to model-facing interface design. The system no longer renders for humans first; it renders for the model and optionally for humans. Good business software orients users toward correct decisions by highlighting what matters, constraining options, and guiding the next step; context interfaces apply the same discipline to agents.
 
-	2.	The Context Window as a First-Class Boundary
+	2. The Context Window as a First-Class Boundary
 
-	The context window is a hard system boundary governing correctness, cost, latency, and behavior. It combines memory limits, API payload, and execution scope. Context must be constructed per step: include required state, exclude noise, order for attention, and refresh or summarize prior state. Blind accumulation degrades accuracy, raises token cost, slows response, and hides causality. Retrieval, pruning, summarization, and projection rules are mandatory. This boundary is where application architecture now lives: what is present, when, why, and for which action. More context is not inherently better; only step-relevant context is.
+	The context window is a hard system boundary governing correctness, cost, latency, and behavior. It combines memory limits, API payload, and execution scope. Context must be constructed per step: include required state, exclude noise, order for attention, and refresh or summarize prior state. Blind accumulation degrades accuracy, raises token cost, slows response, and hides causality. Retrieval, pruning, summarization, and projection rules are mandatory. This boundary is where application architecture now lives: what is present, when, why, and for which action. More context is not inherently better; only step-relevant context is. The usable reasoning surface is smaller than the raw window size suggests, and the portion of the window that can change without destroying prompt-cache efficiency is itself a scarce resource.
 
-	3.	You Already Know This: Translating Web Dev Mental Models
+	3. You Already Know This: Translating Web Dev Mental Models
 
 	Existing web/app concepts map directly. Components → context blocks; routes → workflow steps; state → included context; validation → constrained actions; UI flows → guided progression; props → projected state; events → tool invocations. The model consumes structured context instead of rendering HTML. The same concerns apply: separation of concerns, state visibility, controlled transitions, reuse, and predictable outcomes. This is a relocation of interface design, not a new discipline from scratch.
 
-	4.	Why Current LLM Systems Feel Architecturally Wrong
+	4. Why Current LLM Systems Feel Architecturally Wrong
 
 	Current LLM systems feel wrong because structure is implicit and scattered. Prompts mix state, instructions, and logic; orchestration loops replace architecture; tool use is loosely scoped; context is opaque; ownership is unclear. This resembles pre-framework web development: string assembly, hidden state, weak boundaries, and hard-to-replay behavior. The discomfort is valid. The missing piece is a first-class interface layer where structure, constraints, state, and transitions are explicit and inspectable.
 
 ## The Hidden Structure of Today’s Systems
-	5.	Implicit Constraints: Where They Actually Live Today
+	5. Implicit Constraints: Where They Actually Live Today
 
 	Current systems are already constrained, but the constraints are fragmented and implicit. Prompts encode rules, orchestration code enforces sequence, tool schemas gate actions, validators reject outputs, memory layers shape state, and retries mask inconsistency. These constraints are not unified or inspectable, making behavior hard to reason about, test, or version. The system’s actual architecture is distributed across these layers. The problem is not lack of constraint, but lack of a single, explicit interface where constraints, state, and workflow are declared and visible.
 
-	6.	Prompt Strings as Pre-Framework Chaos
+	6. Prompt Strings as Pre-Framework Chaos
 
 	Prompt construction today resembles pre-framework web development. Logic, state, and presentation are mixed in strings; behavior emerges from ordering and concatenation; reuse is limited; debugging is indirect; changes are fragile. This mirrors early jQuery or server-side templating before component models, state containers, and separation of concerns. The issue is not that prompts are wrong, but that they are being used as the primary abstraction layer. A higher-level structure is missing: components, boundaries, projection rules, and explicit state shaping.
 
-	7.	Orchestration Layers vs Application Architecture
+	7. Orchestration Layers vs Application Architecture
 
 	Orchestration wraps model calls; architecture defines system behavior. Loops, retries, and middleware sequence calls but do not define state, boundaries, allowed transitions, or interface contracts. Without an interface layer, orchestration becomes the de facto architecture, scattering rules across code and making flow hard to inspect. A proper design separates concerns: context interface (what the model sees and can do), harness (how steps execute), and model (how text is interpreted). Sequence is not structure.
 
-	8.	Debugging Without an Interface
+	8. Debugging Without an Interface
 
 	Debugging fails because the interface is not inspectable. The critical artifact is the exact context seen by the model, including order, omissions, freshness, tool availability, and prior outputs. Current practice logs prompts and outputs but lacks diffing, step replay, node-level inspection, and state correlation. Effective debugging requires: snapshotting context per step, comparing variants, tracing tool decisions, replaying transitions, and correlating outcomes to context, schema, and state changes. Treat context like a DOM with devtools, versions, and render traces. Replay, diff, and regression belong to the harness, not just to model evaluation, because inspectability is part of the design problem.
 
 ## Model vs Harness: The Emerging Split
-	9.	Model Development vs Harness Development
+	9. Model Development vs Harness Development
 
 	Two layers are emerging. Model development increases capability (reasoning, context size, multimodality, efficiency). Harness development increases reliability (context construction, workflow, state, tools, replay). Systems fail when capability is high but structure is weak. Progress now depends on harness quality: explicit context, scoped actions, controlled progression, and inspectable state. These layers are coupled but require different skills, artifacts, metrics, and release cycles. Application discipline becomes operational in the harness layer.
 
 	10.	Determinism in the Model vs Determinism in the Interface
 	
-	•	Determinism cannot be extracted from a probabilistic model by prompts alone. Schemas, retries, validators, temperature control, and guardrails add control but remain reactive. Predictability improves when constraints are designed into the interface: fixed steps, limited tools, explicit state, ordered context, bounded transitions, and scoped goals. Move determinism to the environment: what is visible, what is allowed, what must be preserved, and what sequence is followed. Control the space, not the sampler.
+	Determinism cannot be extracted from a probabilistic model by prompts alone. Schemas, retries, validators, temperature control, and guardrails add control but remain reactive. Predictability improves when constraints are designed into the interface: fixed steps, limited tools, explicit state, ordered context, bounded transitions, and scoped goals. Move determinism to the environment: what is visible, what is allowed, what must be preserved, and what sequence is followed. Control the space, not the sampler.
 
 	11.	Why Better Models Don’t Fix Structural Problems
 
@@ -96,7 +96,7 @@
 
 	23.	How Much Context Is Enough?
 
-	Optimal context is minimal and sufficient. Include only task-relevant state, goals, constraints, and tools; exclude history unless summarized. Order for attention: goals → current state → allowed actions → supporting detail. Excess context introduces interference, raises cost, slows iteration, and reduces accuracy. Use retrieval, summarization, pruning, and per-step projection. Measure by outcome quality, token cost, retry rate, and time-to-correct-action, not by completeness. The design question is not how much can fit, but what must be visible for the next valid action. Context that orients the model reduces ambiguity and hallucination; excess or poorly ordered context creates competing interpretations.
+	Optimal context is minimal and sufficient. Include only task-relevant state, goals, constraints, and tools; exclude history unless summarized. Order for attention: goals → current state → allowed actions → supporting detail. Excess context introduces interference, raises cost, slows iteration, and reduces accuracy. Use retrieval, summarization, pruning, and per-step projection. Measure by outcome quality, token cost, retry rate, and time-to-correct-action, not by completeness. The design question is not how much can fit, but what must be visible for the next valid action. Context that orients the model reduces ambiguity and hallucination; excess or poorly ordered context creates competing interpretations. Treat both reasoning bandwidth and cache-stable context as scarce resources: add only what improves the current decision.
 
 	24.	Who Owns the Interface?
 
@@ -122,7 +122,7 @@
 ## Counterintuitive Realities
 	29.	More Context Can Reduce Accuracy
 
-	More context increases interference. Irrelevant tokens compete for attention, shift weighting, blur task boundaries, and degrade selection of correct actions. Larger windows encourage accumulation of stale state, competing alternatives, and low-value history. Prefer minimal, task-scoped context; summarize history; exclude alternatives unless required. Measure by outcome accuracy per step, retry rate, and decision clarity, not by total information included.
+	More context increases interference. Irrelevant tokens compete for attention, shift weighting, blur task boundaries, and degrade selection of correct actions. Larger windows encourage accumulation of stale state, competing alternatives, and low-value history. Prefer minimal, task-scoped context; summarize history; exclude alternatives unless required. Measure by outcome accuracy per step, retry rate, and decision clarity, not by total information included. A large inferencable window does not imply a large reasoned-over window; cognitive bandwidth remains narrow even when token capacity grows.
 
 	30.	Less Freedom Can Improve Outcomes
 
@@ -176,7 +176,7 @@
 
 	42.	What Runs the Server Harness?
 
-	The server harness constructs context, enforces workflow, executes tools, synchronizes state, records transitions, and mediates side effects. It owns context schemas, step definitions, projection rules, execution policy, replay artifacts, and audit boundaries. Implement with any runtime capable of state management, orchestration, durable logging, and controlled execution. Responsibilities are architectural, not language-specific: render context, enforce constraints, run actions, persist outcomes, and reconcile state after each step. Reliability depends on making replay, inspection, and policy enforcement first-class, not incidental. If behavior cannot be replayed and inspected, it is not yet adequately harnessed.
+	The server harness constructs context, enforces workflow, executes tools, synchronizes state, records transitions, and mediates side effects. It owns context schemas, step definitions, projection rules, execution policy, replay artifacts, and audit boundaries. Implement with any runtime capable of state management, orchestration, durable logging, and controlled execution. Responsibilities are architectural, not language-specific: render context, enforce constraints, run actions, persist outcomes, and reconcile state after each step. Reliability depends on making replay, inspection, and policy enforcement first-class, not incidental. If behavior cannot be replayed and inspected, it is not yet adequately harnessed. The harness should also minimize unnecessary churn in stable context regions so prompt caching and repeated inference remain economically viable.
 
 	43.	Browser, Server, CLI, and Hybrid Runtime Choices
 
