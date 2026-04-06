@@ -93,6 +93,25 @@ public sealed class ApplicationEndpointsTests : IClassFixture<WebApplicationFact
     }
 
     [Fact]
+    public async Task ProjectionEndpoints_ReturnCurrentVisibleProjectionForEachTarget()
+    {
+        using var client = CreateClient();
+
+        var agentProjection = await client.GetFromJsonAsync<CurrentInterfaceProjection>("/api/projections/agent");
+        var humanProjection = await client.GetFromJsonAsync<CurrentInterfaceProjection>("/api/projections/human");
+
+        Assert.NotNull(agentProjection);
+        Assert.NotNull(humanProjection);
+        Assert.Equal(ProjectionTarget.Agent, agentProjection!.Target);
+        Assert.Equal(ProjectionTarget.Human, humanProjection!.Target);
+        Assert.Contains(agentProjection.Sections, section => section.Id == "agent-only-illustration");
+        Assert.DoesNotContain(agentProjection.Sections, section => section.Id == "human-only-illustration");
+        Assert.Contains(humanProjection.Sections, section => section.Id == "human-only-illustration");
+        Assert.Contains(agentProjection.Tools, tool => tool.Id == "runtime-substrate");
+        Assert.Contains(agentProjection.Actions, action => action.ActionId == "advance-workflow");
+    }
+
+    [Fact]
     public async Task AgentDebugSurface_RendersEscapedAgentMarkupInHtmlShell()
     {
         using var client = CreateClient();
@@ -103,6 +122,10 @@ public sealed class ApplicationEndpointsTests : IClassFixture<WebApplicationFact
         response.EnsureSuccessStatusCode();
         Assert.Equal("text/html", response.Content.Headers.ContentType?.MediaType);
         Assert.Contains("Agent Surface Debug", content);
+        Assert.Contains("Current Projection", content);
+        Assert.Contains("section:agent-only-illustration", content);
+        Assert.Contains("tool:runtime-substrate", content);
+        Assert.Contains("action:advance-workflow", content);
         Assert.Contains("&lt;context-interface-application consumer=&quot;agent&quot;&gt;", content);
         Assert.Contains("current agent-facing payload", content);
     }

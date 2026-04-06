@@ -55,15 +55,29 @@ app.MapGet("/agent/surface", async (
 app.MapGet("/debug/agent/surface", async (
     ICanonicalStateStore stateStore,
     IAgentSurfaceRenderer renderer,
+    ICurrentInterfaceProjectionResolver projectionResolver,
     IAgentRuntimeSubstrate runtimeSubstrate,
     bool escaped = true) =>
 {
     var state = stateStore.GetState();
+    var projection = projectionResolver.Resolve(state, ProjectionTarget.Agent);
     var surface = await renderer.RenderAsync(state, runtimeSubstrate.Describe());
     var debugContent = escaped
         ? $"<pre>{WebUtility.HtmlEncode(surface.Content)}</pre>"
         : surface.Content;
     var modeLabel = escaped ? "escaped source" : "raw markup";
+    var projectionSummary = $$"""
+    <ul>
+      <li><strong>Sections:</strong> {{projection.Sections.Count}}</li>
+      <li><strong>Tools:</strong> {{projection.Tools.Count}}</li>
+      <li><strong>Actions:</strong> {{projection.Actions.Count}}</li>
+    </ul>
+    """;
+    var projectionItems = string.Join(
+        "",
+        projection.Sections.Select(section => $"<li>section:{WebUtility.HtmlEncode(section.Id)}</li>")
+            .Concat(projection.Tools.Select(tool => $"<li>tool:{WebUtility.HtmlEncode(tool.Id)}</li>"))
+            .Concat(projection.Actions.Select(action => $"<li>action:{WebUtility.HtmlEncode(action.ActionId)}</li>")));
 
     var html = $$"""
     <!DOCTYPE html>
@@ -87,6 +101,14 @@ app.MapGet("/debug/agent/surface", async (
         <h1>Agent Surface Debug</h1>
         <p>This view shows the current agent-facing payload in {{modeLabel}} mode.</p>
         <section>
+          <h2>Current Projection</h2>
+          <p>This summary is resolved through the current interface projection seam.</p>
+          {{projectionSummary}}
+          <ul>
+            {{projectionItems}}
+          </ul>
+        </section>
+        <section>
           {{debugContent}}
         </section>
       </main>
@@ -100,6 +122,28 @@ app.MapGet("/debug/agent/surface", async (
 app.MapGet("/api/state", (ICanonicalStateStore stateStore) => Results.Ok(stateStore.GetState()));
 
 app.MapGet("/api/runtime", (IAgentRuntimeSubstrate runtimeSubstrate) => Results.Ok(runtimeSubstrate.Describe()));
+
+app.MapGet("/api/projections/{target}", (
+    string target,
+    ICanonicalStateStore stateStore,
+    ICurrentInterfaceProjectionResolver projectionResolver) =>
+{
+    var projectionTarget = target.ToLowerInvariant() switch
+    {
+        "agent" => ProjectionTarget.Agent,
+        "human" => ProjectionTarget.Human,
+        _ => (ProjectionTarget?)null
+    };
+
+    if (projectionTarget is null)
+    {
+        return Results.NotFound();
+    }
+
+    var state = stateStore.GetState();
+    var projection = projectionResolver.Resolve(state, projectionTarget.Value);
+    return Results.Ok(projection);
+});
 
 app.MapGet("/api/agent/snapshot", (
     ICanonicalStateStore stateStore,
