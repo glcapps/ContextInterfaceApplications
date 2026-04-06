@@ -21,6 +21,8 @@ builder.Services.AddSingleton<IContextToolHandler, InspectItemContextToolHandler
 builder.Services.AddSingleton<IContextToolHandler, InspectReviewPolicyToolHandler>();
 builder.Services.AddSingleton<IContextToolHandler, InspectReviewHistoryToolHandler>();
 builder.Services.AddSingleton<IContextToolHandler, InspectFollowupGuidanceToolHandler>();
+builder.Services.AddSingleton<IContextToolHandler, InspectInboxContextToolHandler>();
+builder.Services.AddSingleton<IContextToolHandler, InspectRoutingPolicyToolHandler>();
 builder.Services.AddSingleton<IBlazorComponentRenderer, BlazorComponentRenderer>();
 builder.Services.AddSingleton<IHumanSurfaceRenderer, HumanSurfaceRenderer>();
 builder.Services.AddSingleton<IAgentSurfaceRenderer, AgentSurfaceRenderer>();

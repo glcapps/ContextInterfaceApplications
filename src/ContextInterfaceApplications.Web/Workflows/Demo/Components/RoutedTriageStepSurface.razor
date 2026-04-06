@@ -1,0 +1,16 @@
+@namespace ContextInterfaceApplications.Web.Workflows.Demo.Components
+@using ContextInterfaceApplications.Web.Models
+@using ContextInterfaceApplications.Web.Components.Shared
+
+@foreach (var section in GetSections())
+{
+    <ProjectionSection Definition="section" Target="Target" />
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public required ContextInterfaceState State { get; set; }
+
+    [Parameter]
+    public ProjectionTarget Target { get; set; }
+}

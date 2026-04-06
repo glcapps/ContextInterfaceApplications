@@ -13,6 +13,9 @@ public sealed class DemoStepComponentResolver : IStepComponentResolver
             "in-review" => typeof(SharedStateProjectionStepSurface),
             "needs-followup" => typeof(ReplayCaptureStepSurface),
             "approved" => typeof(ApprovedStepSurface),
+            "queued-item" => typeof(QueuedTriageStepSurface),
+            "deferred-item" => typeof(DeferredTriageStepSurface),
+            "routed-item" => typeof(RoutedTriageStepSurface),
             _ => null
         };
 }

@@ -14,6 +14,9 @@ public sealed class DemoStepSurfaceMetadataResolver : IStepSurfaceMetadataResolv
             "in-review" => SharedStateProjectionStepSurface.GetSections(),
             "needs-followup" => ReplayCaptureStepSurface.GetSections(),
             "approved" => ApprovedStepSurface.GetSections(),
+            "queued-item" => QueuedTriageStepSurface.GetSections(),
+            "deferred-item" => DeferredTriageStepSurface.GetSections(),
+            "routed-item" => RoutedTriageStepSurface.GetSections(),
             _ => []
         };
 

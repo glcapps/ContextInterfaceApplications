@@ -36,6 +36,7 @@ public sealed class ApplicationEndpointsTests : IClassFixture<WebApplicationFact
         Assert.Contains("Shared Review Brief", content);
         Assert.Contains("Review Action", content);
         Assert.Contains("start-review", content);
+        Assert.Contains("switch-to-triage-workspace", content);
     }
 
     [Fact]
@@ -55,6 +56,7 @@ public sealed class ApplicationEndpointsTests : IClassFixture<WebApplicationFact
         Assert.Contains("<interface-section id=\"shared-review-brief\"", agentContent);
         Assert.Contains("<available-actions>", agentContent);
         Assert.Contains("action-id=\"start-review\"", agentContent);
+        Assert.Contains("action-id=\"switch-to-triage-workspace\"", agentContent);
         Assert.Contains("source-component=\"FoundationalDemoAction\"", agentContent);
         Assert.Contains("step-id=\"new-item\"", agentContent);
         Assert.Contains("<tool id=\"inspect-item-context\" scope=\"application-surface\" source-component=\"FoundationalDemoAction\">", agentContent);
@@ -114,6 +116,7 @@ public sealed class ApplicationEndpointsTests : IClassFixture<WebApplicationFact
         Assert.Contains(humanProjection.Sections, section => section.Id == "reviewer-notes");
         Assert.Contains(agentProjection.Tools, tool => tool.Id == "inspect-item-context");
         Assert.Contains(agentProjection.Actions, action => action.ActionId == "start-review");
+        Assert.Contains(agentProjection.Actions, action => action.ActionId == "switch-to-triage-workspace");
     }
 
     [Fact]
@@ -243,6 +246,79 @@ public sealed class ApplicationEndpointsTests : IClassFixture<WebApplicationFact
         Assert.Contains("inspect-followup-guidance", replayState.CurrentState.CurrentVisibleToolIds);
         Assert.DoesNotContain("approve-item", replayState.CurrentState.CurrentAvailableActionIds);
         Assert.Contains("resume-review", replayState.CurrentState.CurrentAvailableActionIds);
+        Assert.Contains("switch-to-triage-workspace", replayState.CurrentState.CurrentAvailableActionIds);
+    }
+
+    [Fact]
+    public async Task WorkspaceSwitch_ReplacesTheVisibleSurfaceInsteadOfAccumulatingIt()
+    {
+        using var client = CreateClient();
+
+        var initialState = await client.GetFromJsonAsync<ContextInterfaceState>("/api/state");
+        Assert.NotNull(initialState);
+        Assert.Equal("Item Review Workspace", initialState!.WorkflowName);
+
+        var switchResponse = await client.PostAsJsonAsync(
+            "/api/agent/actions",
+            new AgentActionRequest("switch-to-triage-workspace", initialState.CurrentStep.Id));
+        switchResponse.EnsureSuccessStatusCode();
+
+        var switchResult = await switchResponse.Content.ReadFromJsonAsync<AgentActionResult>();
+        Assert.NotNull(switchResult);
+        Assert.Equal("Inbox Triage Workspace", switchResult!.CurrentState.WorkflowName);
+        Assert.Equal("queued-item", switchResult.CurrentState.CurrentStep.Id);
+        Assert.Equal("item-7713", switchResult.CurrentState.CurrentItem.Id);
+        Assert.Contains("inspect-inbox-context", switchResult.CurrentState.CurrentVisibleToolIds);
+        Assert.DoesNotContain("inspect-item-context", switchResult.CurrentState.CurrentVisibleToolIds);
+        Assert.Contains("assign-review", switchResult.CurrentState.CurrentAvailableActionIds);
+        Assert.Contains("switch-to-review-workspace", switchResult.CurrentState.CurrentAvailableActionIds);
+        Assert.DoesNotContain("start-review", switchResult.CurrentState.CurrentAvailableActionIds);
+
+        var humanSurface = await client.GetStringAsync("/");
+        var agentSurface = await client.GetStringAsync("/agent/surface");
+
+        Assert.Contains("Inbox Triage Workspace", humanSurface);
+        Assert.Contains("Triage Incoming Item", humanSurface);
+        Assert.Contains("assign-review", humanSurface);
+        Assert.Contains("switch-to-review-workspace", humanSurface);
+        Assert.DoesNotContain("Review Submitted Item", humanSurface);
+        Assert.DoesNotContain("start-review", humanSurface);
+        Assert.Contains("<workflow name=\"Inbox Triage Workspace\">", agentSurface);
+        Assert.Contains("<review-item id=\"item-7713\" status=\"queued\">", agentSurface);
+        Assert.Contains("action-id=\"assign-review\"", agentSurface);
+        Assert.Contains("action-id=\"switch-to-review-workspace\"", agentSurface);
+        Assert.DoesNotContain("action-id=\"start-review\"", agentSurface);
+        Assert.DoesNotContain("tool id=\"inspect-item-context\"", agentSurface);
+    }
+
+    [Fact]
+    public async Task WorkspaceSwitch_CanReturnToTheReviewWorkspace()
+    {
+        using var client = CreateClient();
+
+        var initialState = await client.GetFromJsonAsync<ContextInterfaceState>("/api/state");
+        Assert.NotNull(initialState);
+
+        var switchToTriage = await client.PostAsJsonAsync(
+            "/api/agent/actions",
+            new AgentActionRequest("switch-to-triage-workspace", initialState!.CurrentStep.Id));
+        switchToTriage.EnsureSuccessStatusCode();
+
+        var triageState = await switchToTriage.Content.ReadFromJsonAsync<AgentActionResult>();
+        Assert.NotNull(triageState);
+
+        var switchBack = await client.PostAsJsonAsync(
+            "/api/agent/actions",
+            new AgentActionRequest("switch-to-review-workspace", triageState!.CurrentState.CurrentStep.Id));
+        switchBack.EnsureSuccessStatusCode();
+
+        var reviewState = await switchBack.Content.ReadFromJsonAsync<AgentActionResult>();
+        Assert.NotNull(reviewState);
+        Assert.Equal("Item Review Workspace", reviewState!.CurrentState.WorkflowName);
+        Assert.Equal("new-item", reviewState.CurrentState.CurrentStep.Id);
+        Assert.Equal("item-4821", reviewState.CurrentState.CurrentItem.Id);
+        Assert.Contains("start-review", reviewState.CurrentState.CurrentAvailableActionIds);
+        Assert.DoesNotContain("assign-review", reviewState.CurrentState.CurrentAvailableActionIds);
     }
 
     [Fact]
@@ -310,6 +386,29 @@ public sealed class ApplicationEndpointsTests : IClassFixture<WebApplicationFact
         Assert.Contains(
             transition.BeforeSnapshot.Root.Children.Single(child => child.NodeType == "workflow").Children.Single(child => child.NodeType == "available-actions").Children,
             child => child.Id == "start-review");
+    }
+
+    [Fact]
+    public async Task WorkspaceSwitch_RecordsDistinctBeforeAndAfterWorkspacesInReplay()
+    {
+        using var client = CreateClient();
+
+        var initialState = await client.GetFromJsonAsync<ContextInterfaceState>("/api/state");
+        Assert.NotNull(initialState);
+
+        var actionResponse = await client.PostAsJsonAsync(
+            "/api/agent/actions",
+            new AgentActionRequest("switch-to-triage-workspace", initialState!.CurrentStep.Id));
+        actionResponse.EnsureSuccessStatusCode();
+
+        var transitionResponse = await client.GetAsync("/api/replay/transitions/latest");
+        transitionResponse.EnsureSuccessStatusCode();
+
+        var transition = await transitionResponse.Content.ReadFromJsonAsync<TransitionArtifact>();
+        Assert.NotNull(transition);
+        Assert.Equal("switch-to-triage-workspace", transition!.ActionId);
+        Assert.Contains("<workflow name=\"Item Review Workspace\">", transition.BeforeSurface.Content);
+        Assert.Contains("<workflow name=\"Inbox Triage Workspace\">", transition.AfterSurface.Content);
     }
 
     [Fact]

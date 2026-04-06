@@ -38,10 +38,10 @@
             <WorkflowPanel State="State" Target="ProjectionTarget.Human" />
             <VisibleToolsPanel Tools="Projection.Tools" Target="ProjectionTarget.Human" />
         </div>
-        @if (Projection.Actions.Count > 0)
+        @foreach (var action in Projection.Actions)
         {
-            <DynamicComponent Type="ActionComponentResolver.Resolve(Projection.Actions[0].SourceComponent)"
-                              Parameters="BuildActionParameters(Projection.Actions[0], ProjectionTarget.Human)" />
+            <DynamicComponent Type="ActionComponentResolver.Resolve(action.SourceComponent)"
+                              Parameters="BuildActionParameters(action, ProjectionTarget.Human)" />
         }
         <ProjectedResultsPanel Results="State.RecentResults" Target="ProjectionTarget.Human" />
     </main>

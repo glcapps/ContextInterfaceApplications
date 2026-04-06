@@ -7,7 +7,9 @@ public sealed class ActionComponentResolver : IActionComponentResolver
     private static readonly IReadOnlyDictionary<string, Type> ComponentMap = new Dictionary<string, Type>(StringComparer.Ordinal)
     {
         [nameof(FoundationalDemoAction)] = typeof(FoundationalDemoAction),
-        [nameof(ReplayCaptureAction)] = typeof(ReplayCaptureAction)
+        [nameof(ReplayCaptureAction)] = typeof(ReplayCaptureAction),
+        [nameof(TriageWorkspaceAction)] = typeof(TriageWorkspaceAction),
+        [nameof(WorkspaceSwitchAction)] = typeof(WorkspaceSwitchAction)
     };
 
     public Type Resolve(string sourceComponent) =>
