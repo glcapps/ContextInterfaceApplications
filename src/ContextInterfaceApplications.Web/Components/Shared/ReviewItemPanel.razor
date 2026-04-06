@@ -1,0 +1,28 @@
+@namespace ContextInterfaceApplications.Web.Components.Shared
+@using ContextInterfaceApplications.Web.Models
+
+@if (Target == ProjectionTarget.Human)
+{
+    <section>
+        <h2>Current Item</h2>
+        <p><strong>@Item.Title</strong> <code>@Item.Status</code></p>
+        <p>@Item.Summary</p>
+        <p class="muted">@Item.Detail</p>
+    </section>
+}
+else
+{
+    <review-item id="@Item.Id" status="@Item.Status">
+        <title>@Item.Title</title>
+        <summary>@Item.Summary</summary>
+        <detail>@Item.Detail</detail>
+    </review-item>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public required ReviewItem Item { get; set; }
+
+    [Parameter]
+    public ProjectionTarget Target { get; set; }
+}

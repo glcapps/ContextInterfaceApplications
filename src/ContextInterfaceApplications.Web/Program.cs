@@ -17,9 +17,10 @@ builder.Services.AddSingleton<ICurrentInterfaceProjectionResolver, CurrentInterf
 builder.Services.AddSingleton<ICanonicalStateStore, WorkflowStateStore>();
 builder.Services.AddSingleton<IActionComponentResolver, ActionComponentResolver>();
 builder.Services.AddSingleton<IContextToolInvoker, ContextToolInvoker>();
-builder.Services.AddSingleton<IContextToolHandler, RuntimeSubstrateToolHandler>();
-builder.Services.AddSingleton<IContextToolHandler, InspectDualProjectionToolHandler>();
-builder.Services.AddSingleton<IContextToolHandler, InspectReplayToolHandler>();
+builder.Services.AddSingleton<IContextToolHandler, InspectItemContextToolHandler>();
+builder.Services.AddSingleton<IContextToolHandler, InspectReviewPolicyToolHandler>();
+builder.Services.AddSingleton<IContextToolHandler, InspectReviewHistoryToolHandler>();
+builder.Services.AddSingleton<IContextToolHandler, InspectFollowupGuidanceToolHandler>();
 builder.Services.AddSingleton<IBlazorComponentRenderer, BlazorComponentRenderer>();
 builder.Services.AddSingleton<IHumanSurfaceRenderer, HumanSurfaceRenderer>();
 builder.Services.AddSingleton<IAgentSurfaceRenderer, AgentSurfaceRenderer>();
@@ -68,10 +69,12 @@ app.MapGet("/debug/agent/surface", async (
     var modeLabel = escaped ? "escaped source" : "raw markup";
     var projectionSummary = $$"""
     <ul>
-      <li><strong>Sections:</strong> {{projection.Sections.Count}}</li>
-      <li><strong>Tools:</strong> {{projection.Tools.Count}}</li>
-      <li><strong>Actions:</strong> {{projection.Actions.Count}}</li>
-    </ul>
+          <li><strong>Item:</strong> {{WebUtility.HtmlEncode(state.CurrentItem.Title)}}</li>
+          <li><strong>Status:</strong> {{WebUtility.HtmlEncode(state.CurrentItem.Status)}}</li>
+          <li><strong>Sections:</strong> {{projection.Sections.Count}}</li>
+          <li><strong>Tools:</strong> {{projection.Tools.Count}}</li>
+          <li><strong>Actions:</strong> {{projection.Actions.Count}}</li>
+        </ul>
     """;
     var projectionItems = string.Join(
         "",

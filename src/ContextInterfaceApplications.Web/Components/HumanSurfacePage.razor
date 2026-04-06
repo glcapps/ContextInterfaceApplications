@@ -34,6 +34,7 @@
                               Parameters="BuildStepParameters(State, ProjectionTarget.Human)" />
         }
         <div class="grid">
+            <ReviewItemPanel Item="State.CurrentItem" Target="ProjectionTarget.Human" />
             <WorkflowPanel State="State" Target="ProjectionTarget.Human" />
             <VisibleToolsPanel Tools="Projection.Tools" Target="ProjectionTarget.Human" />
         </div>

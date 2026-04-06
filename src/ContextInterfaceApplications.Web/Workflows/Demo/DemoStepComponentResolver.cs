@@ -9,9 +9,10 @@ public sealed class DemoStepComponentResolver : IStepComponentResolver
     public Type? Resolve(string stepId, ProjectionTarget target) =>
         stepId switch
         {
-            "intent-anchoring" => typeof(IntentAnchoringStepSurface),
-            "shared-state-projection" => typeof(SharedStateProjectionStepSurface),
-            "replay-capture" => typeof(ReplayCaptureStepSurface),
+            "new-item" => typeof(IntentAnchoringStepSurface),
+            "in-review" => typeof(SharedStateProjectionStepSurface),
+            "needs-followup" => typeof(ReplayCaptureStepSurface),
+            "approved" => typeof(ApprovedStepSurface),
             _ => null
         };
 }

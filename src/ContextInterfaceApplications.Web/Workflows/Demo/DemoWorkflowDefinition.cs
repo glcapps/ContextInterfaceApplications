@@ -18,27 +18,36 @@ public sealed class DemoWorkflowDefinition : IWorkflowDefinition
         _affordanceResolver = affordanceResolver;
     }
 
-    public string WorkflowId => "demo-bootstrap";
+    public string WorkflowId => "item-review-workspace";
 
     public ContextInterfaceState CreateInitialState() => BuildState(
-        "intent-anchoring",
-        "Anchor the proof of concept to the workflow, not the framework.",
-        "Keep MAF in the runtime layer and keep interface semantics in application state.",
-        "Advance to the shared projection step.");
+        BuildItem("item-4821", "Review Submitted Item", "new"),
+        "new-item",
+        "Review a newly submitted item.",
+        "Assess whether the item is ready to enter active review.",
+        "Start review.");
 
     public ContextInterfaceState GetNextState(string currentStepId) =>
         currentStepId switch
         {
-            "intent-anchoring" => BuildState(
-                "shared-state-projection",
-                "Define shared canonical state and visible dual surfaces.",
-                "Render a human view and an agent view from the same state object.",
-                "Promote the projection pipeline to replay capture."),
-            "shared-state-projection" => BuildState(
-                "replay-capture",
-                "Capture what the agent actually saw.",
-                "Persist rendered agent-facing artifacts as replay material.",
-                "Inspect the latest replay artifact."),
+            "new-item" => BuildState(
+                BuildItem("item-4821", "Review Submitted Item", "in_review"),
+                "in-review",
+                "Evaluate the item in active review.",
+                "Choose whether to approve the item or request follow-up.",
+                "Approve item or request follow-up."),
+            "needs-followup" => BuildState(
+                BuildItem("item-4821", "Review Submitted Item", "in_review"),
+                "in-review",
+                "Resume active review after follow-up.",
+                "Use the additional context to approve the item or request more follow-up.",
+                "Approve item or request follow-up."),
+            "approved" => BuildState(
+                BuildItem("item-4821", "Review Submitted Item", "in_review"),
+                "in-review",
+                "Reopened review.",
+                "The item is back in review after being reopened.",
+                "Approve item or request follow-up."),
             _ => CreateInitialState()
         };
 
@@ -62,8 +71,21 @@ public sealed class DemoWorkflowDefinition : IWorkflowDefinition
 
         var nextState = request.ActionId switch
         {
-            "advance-workflow" => GetNextState(currentState.CurrentStep.Id),
-            "reset-workflow" => CreateInitialState(),
+            "start-review" => GetNextState(currentState.CurrentStep.Id),
+            "approve-item" => BuildState(
+                currentState.CurrentItem with { Status = "approved" },
+                "approved",
+                "Item approved.",
+                "The item is approved and can be reopened if another pass is needed.",
+                "Reopen review."),
+            "request-followup" => BuildState(
+                currentState.CurrentItem with { Status = "needs_followup" },
+                "needs-followup",
+                "Follow-up requested.",
+                "The item needs additional information before approval.",
+                "Resume review."),
+            "resume-review" => GetNextState(currentState.CurrentStep.Id),
+            "reopen-review" => GetNextState(currentState.CurrentStep.Id),
             _ => currentState
         };
 
@@ -74,6 +96,7 @@ public sealed class DemoWorkflowDefinition : IWorkflowDefinition
     }
 
     private ContextInterfaceState BuildState(
+        ReviewItem item,
         string stepId,
         string title,
         string decision,
@@ -81,21 +104,30 @@ public sealed class DemoWorkflowDefinition : IWorkflowDefinition
     {
         return new ContextInterfaceState(
             "Context Interface Applications",
-            "Proof of Concept Bootstrap",
+            "Item Review Workspace",
+            item,
             new WorkflowStep(stepId, title, decision, nextValidAction),
             _affordanceResolver.GetTools(stepId).Select(tool => tool.Id).ToArray(),
             _affordanceResolver.GetActions(stepId).Select(action => action.ActionId).ToArray(),
             new[]
             {
                 new ProjectedResult(
-                    "Canonical state",
-                    "Shared application state is the single source for both human and agent projections.",
+                    "Item summary",
+                    $"{item.Title} is currently marked as {item.Status}.",
                     DateTimeOffset.UtcNow.AddMinutes(-3)),
                 new ProjectedResult(
-                    "Current constraint",
-                    "The visible interface is the payload. No alternate hidden context object exists.",
+                    "Review guidance",
+                    $"The current step '{stepId}' exposes only the actions appropriate for this review state.",
                     DateTimeOffset.UtcNow.AddMinutes(-1))
             },
             DateTimeOffset.UtcNow);
     }
+
+    private static ReviewItem BuildItem(string id, string title, string status) =>
+        new(
+            id,
+            title,
+            status,
+            "A generic submitted item that needs review before it can be approved.",
+            "Use the current surface to inspect the item, review prior notes, and choose the next valid review action.");
 }

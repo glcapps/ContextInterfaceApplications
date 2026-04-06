@@ -48,6 +48,16 @@ public sealed class AgentInterfaceSnapshotBuilder : IAgentInterfaceSnapshotBuild
                     ],
                     []),
                 new InterfaceNode(
+                    "current-item",
+                    state.CurrentItem.Id,
+                    state.CurrentItem.Title,
+                    state.CurrentItem.Summary,
+                    [
+                        new InterfaceNodeProperty("status", state.CurrentItem.Status),
+                        new InterfaceNodeProperty("detail", state.CurrentItem.Detail)
+                    ],
+                    []),
+                new InterfaceNode(
                     "step-sections",
                     "step-sections",
                     "Step Sections",

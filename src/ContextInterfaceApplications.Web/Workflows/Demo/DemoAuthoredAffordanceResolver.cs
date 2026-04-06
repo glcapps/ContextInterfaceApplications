@@ -9,16 +9,16 @@ public sealed class DemoAuthoredAffordanceResolver : IAuthoredAffordanceResolver
     public IReadOnlyList<AuthoredToolContract> GetTools(string stepId) =>
         stepId switch
         {
-            "intent-anchoring" or "shared-state-projection" => FoundationalDemoAction.GetAuthoredToolsForStep(stepId),
-            "replay-capture" => ReplayCaptureAction.GetAuthoredToolsForStep(stepId),
+            "new-item" or "in-review" => FoundationalDemoAction.GetAuthoredToolsForStep(stepId),
+            "needs-followup" or "approved" => ReplayCaptureAction.GetAuthoredToolsForStep(stepId),
             _ => []
         };
 
     public IReadOnlyList<AuthoredActionContract> GetActions(string stepId) =>
         stepId switch
         {
-            "intent-anchoring" or "shared-state-projection" => FoundationalDemoAction.GetAuthoredActionsForStep(stepId),
-            "replay-capture" => ReplayCaptureAction.GetAuthoredActionsForStep(stepId),
+            "new-item" or "in-review" => FoundationalDemoAction.GetAuthoredActionsForStep(stepId),
+            "needs-followup" or "approved" => ReplayCaptureAction.GetAuthoredActionsForStep(stepId),
             _ => []
         };
 }

@@ -19,6 +19,7 @@
         <DynamicComponent Type="stepComponent"
                           Parameters="BuildStepParameters(State, ProjectionTarget.Agent)" />
     }
+    <ReviewItemPanel Item="State.CurrentItem" Target="ProjectionTarget.Agent" />
     <WorkflowPanel State="State" Target="ProjectionTarget.Agent" />
     <AgentActionContractPanel Actions="Projection.Actions" />
     <VisibleToolsPanel Tools="Projection.Tools" Target="ProjectionTarget.Agent" />

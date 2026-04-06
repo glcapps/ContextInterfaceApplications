@@ -24,9 +24,9 @@ public sealed class RenderingTests
         var artifact = await renderer.RenderAsync(state, substrate);
 
         Assert.Contains("<context-interface-application consumer=\"agent\">", artifact.Content);
-        Assert.Contains("<workflow name=\"Proof of Concept Bootstrap\">", artifact.Content);
-        Assert.Contains("<name>Microsoft Agent Framework</name>", artifact.Content);
-        Assert.Contains("application semantics remain in canonical state", artifact.Content);
+        Assert.Contains("<workflow name=\"Item Review Workspace\">", artifact.Content);
+        Assert.Contains("<review-item id=\"item-4821\" status=\"new\">", artifact.Content);
+        Assert.Contains("Review Submitted Item", artifact.Content);
     }
 
     [Fact]
@@ -40,8 +40,8 @@ public sealed class RenderingTests
         stateStore.AdvanceWorkflow();
         var updatedHtml = await renderer.RenderAsync(stateStore.GetState());
 
-        Assert.Contains("Anchor the proof of concept", initialHtml);
-        Assert.Contains("Define shared canonical state and visible dual surfaces.", updatedHtml);
+        Assert.Contains("Review a newly submitted item.", initialHtml);
+        Assert.Contains("Evaluate the item in active review.", updatedHtml);
     }
 
     [Fact]
@@ -92,18 +92,20 @@ public sealed class RenderingTests
 
         var workflowNode = Assert.Single(snapshot.Root.Children, child => child.NodeType == "workflow");
         var stepNode = Assert.Single(workflowNode.Children, child => child.NodeType == "step");
+        var itemNode = Assert.Single(workflowNode.Children, child => child.NodeType == "current-item");
         var sectionsNode = Assert.Single(workflowNode.Children, child => child.NodeType == "step-sections");
         var toolsNode = Assert.Single(workflowNode.Children, child => child.NodeType == "visible-tools");
         var actionsNode = Assert.Single(workflowNode.Children, child => child.NodeType == "available-actions");
         var resultsNode = Assert.Single(workflowNode.Children, child => child.NodeType == "projected-results");
         var runtimeNode = Assert.Single(snapshot.Root.Children, child => child.NodeType == "runtime-substrate");
 
-        Assert.Equal("intent-anchoring", stepNode.Id);
-        Assert.Contains(sectionsNode.Children, child => child.Id == "agent-only-illustration");
-        Assert.Contains(sectionsNode.Children, child => child.Id == "shared-illustration");
-        Assert.DoesNotContain(sectionsNode.Children, child => child.Id == "human-only-illustration");
-        Assert.Contains(toolsNode.Children, child => child.Id == "runtime-substrate");
-        Assert.Contains(actionsNode.Children, child => child.Id == "advance-workflow");
+        Assert.Equal("new-item", stepNode.Id);
+        Assert.Equal("item-4821", itemNode.Id);
+        Assert.Contains(sectionsNode.Children, child => child.Id == "agent-review-focus");
+        Assert.Contains(sectionsNode.Children, child => child.Id == "shared-review-brief");
+        Assert.DoesNotContain(sectionsNode.Children, child => child.Id == "reviewer-notes");
+        Assert.Contains(toolsNode.Children, child => child.Id == "inspect-item-context");
+        Assert.Contains(actionsNode.Children, child => child.Id == "start-review");
         Assert.Contains(toolsNode.Children, child => child.Properties.Any(property => property is { Name: "source-component", Value: "FoundationalDemoAction" }));
         Assert.Contains(actionsNode.Children, child => child.Properties.Any(property => property is { Name: "source-component", Value: "FoundationalDemoAction" }));
         Assert.NotEmpty(resultsNode.Children);
@@ -121,9 +123,9 @@ public sealed class RenderingTests
         var projection = resolver.Resolve(state, ProjectionTarget.Agent);
 
         Assert.Equal(ProjectionTarget.Agent, projection.Target);
-        Assert.Contains(projection.Sections, section => section.Id == "agent-only-illustration");
-        Assert.DoesNotContain(projection.Sections, section => section.Id == "human-only-illustration");
-        Assert.Contains(projection.Tools, tool => tool.Id == "runtime-substrate");
-        Assert.Contains(projection.Actions, action => action.ActionId == "advance-workflow");
+        Assert.Contains(projection.Sections, section => section.Id == "agent-review-focus");
+        Assert.DoesNotContain(projection.Sections, section => section.Id == "reviewer-notes");
+        Assert.Contains(projection.Tools, tool => tool.Id == "inspect-item-context");
+        Assert.Contains(projection.Actions, action => action.ActionId == "start-review");
     }
 }

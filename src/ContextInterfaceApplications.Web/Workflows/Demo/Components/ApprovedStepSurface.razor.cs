@@ -2,16 +2,16 @@ using ContextInterfaceApplications.Web.Models;
 
 namespace ContextInterfaceApplications.Web.Workflows.Demo.Components;
 
-public partial class SharedStateProjectionStepSurface
+public partial class ApprovedStepSurface
 {
     internal static IReadOnlyList<SurfaceSectionDefinition> GetSections() =>
     [
         new SurfaceSectionDefinition(
-            "active-review-checklist",
-            "Active Review Checklist",
-            "This step represents active review, where the current item can either be approved or sent for follow-up.",
+            "approval-summary",
+            "Approval Summary",
+            "This step represents a completed review outcome while keeping the item reopenable for another pass.",
             SurfaceSectionVisibility.Shared,
             "volatile",
-            nameof(SharedStateProjectionStepSurface))
+            nameof(ApprovedStepSurface))
     ];
 }

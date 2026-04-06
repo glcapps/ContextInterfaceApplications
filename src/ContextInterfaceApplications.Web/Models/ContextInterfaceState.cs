@@ -3,11 +3,19 @@ namespace ContextInterfaceApplications.Web.Models;
 public sealed record ContextInterfaceState(
     string ApplicationName,
     string WorkflowName,
+    ReviewItem CurrentItem,
     WorkflowStep CurrentStep,
     IReadOnlyList<string> CurrentVisibleToolIds,
     IReadOnlyList<string> CurrentAvailableActionIds,
     IReadOnlyList<ProjectedResult> RecentResults,
     DateTimeOffset UpdatedAtUtc);
+
+public sealed record ReviewItem(
+    string Id,
+    string Title,
+    string Status,
+    string Summary,
+    string Detail);
 
 public sealed record WorkflowStep(
     string Id,

@@ -28,12 +28,14 @@ public sealed class ApplicationEndpointsTests : IClassFixture<WebApplicationFact
         response.EnsureSuccessStatusCode();
         Assert.Equal("text/html", response.Content.Headers.ContentType?.MediaType);
         Assert.Contains("<!DOCTYPE html>", content);
+        Assert.Contains("Current Item", content);
+        Assert.Contains("Review Submitted Item", content);
         Assert.Contains("Current Decision", content);
         Assert.Contains("Visible Tools", content);
-        Assert.Contains("Human-Only Illustration", content);
-        Assert.Contains("Shared Illustration", content);
-        Assert.Contains("Foundational Demo Action", content);
-        Assert.Contains("advance-workflow", content);
+        Assert.Contains("Reviewer Notes", content);
+        Assert.Contains("Shared Review Brief", content);
+        Assert.Contains("Review Action", content);
+        Assert.Contains("start-review", content);
     }
 
     [Fact]
@@ -47,14 +49,15 @@ public sealed class ApplicationEndpointsTests : IClassFixture<WebApplicationFact
         agentResponse.EnsureSuccessStatusCode();
         Assert.Equal("application/xhtml+xml", agentResponse.Content.Headers.ContentType?.MediaType);
         Assert.Contains("<context-interface-application consumer=\"agent\">", agentContent);
-        Assert.Contains("<workflow name=\"Proof of Concept Bootstrap\">", agentContent);
-        Assert.Contains("<interface-section id=\"agent-only-illustration\"", agentContent);
-        Assert.Contains("<interface-section id=\"shared-illustration\"", agentContent);
+        Assert.Contains("<workflow name=\"Item Review Workspace\">", agentContent);
+        Assert.Contains("<review-item id=\"item-4821\" status=\"new\">", agentContent);
+        Assert.Contains("<interface-section id=\"agent-review-focus\"", agentContent);
+        Assert.Contains("<interface-section id=\"shared-review-brief\"", agentContent);
         Assert.Contains("<available-actions>", agentContent);
-        Assert.Contains("action-id=\"advance-workflow\"", agentContent);
+        Assert.Contains("action-id=\"start-review\"", agentContent);
         Assert.Contains("source-component=\"FoundationalDemoAction\"", agentContent);
-        Assert.Contains("step-id=\"intent-anchoring\"", agentContent);
-        Assert.Contains("<tool id=\"advance-workflow\" scope=\"application-surface\" source-component=\"FoundationalDemoAction\">", agentContent);
+        Assert.Contains("step-id=\"new-item\"", agentContent);
+        Assert.Contains("<tool id=\"inspect-item-context\" scope=\"application-surface\" source-component=\"FoundationalDemoAction\">", agentContent);
 
         var replayResponse = await client.GetAsync("/api/replay/latest");
         var replayContent = await replayResponse.Content.ReadAsStringAsync();
@@ -78,17 +81,19 @@ public sealed class ApplicationEndpointsTests : IClassFixture<WebApplicationFact
 
         var workflowNode = Assert.Single(snapshot.Root.Children, child => child.NodeType == "workflow");
         var stepNode = Assert.Single(workflowNode.Children, child => child.NodeType == "step");
+        var itemNode = Assert.Single(workflowNode.Children, child => child.NodeType == "current-item");
         var sectionsNode = Assert.Single(workflowNode.Children, child => child.NodeType == "step-sections");
         var toolsNode = Assert.Single(workflowNode.Children, child => child.NodeType == "visible-tools");
         var actionsNode = Assert.Single(workflowNode.Children, child => child.NodeType == "available-actions");
         var runtimeNode = Assert.Single(snapshot.Root.Children, child => child.NodeType == "runtime-substrate");
 
-        Assert.Equal("intent-anchoring", stepNode.Id);
-        Assert.Contains(sectionsNode.Children, child => child.Id == "agent-only-illustration");
-        Assert.Contains(sectionsNode.Children, child => child.Id == "shared-illustration");
-        Assert.DoesNotContain(sectionsNode.Children, child => child.Id == "human-only-illustration");
-        Assert.Contains(toolsNode.Children, child => child.Id == "runtime-substrate");
-        Assert.Contains(actionsNode.Children, child => child.Id == "advance-workflow");
+        Assert.Equal("new-item", stepNode.Id);
+        Assert.Equal("item-4821", itemNode.Id);
+        Assert.Contains(sectionsNode.Children, child => child.Id == "agent-review-focus");
+        Assert.Contains(sectionsNode.Children, child => child.Id == "shared-review-brief");
+        Assert.DoesNotContain(sectionsNode.Children, child => child.Id == "reviewer-notes");
+        Assert.Contains(toolsNode.Children, child => child.Id == "inspect-item-context");
+        Assert.Contains(actionsNode.Children, child => child.Id == "start-review");
         Assert.Contains(runtimeNode.Properties, property => property is { Name: "version", Value: not null });
     }
 
@@ -104,11 +109,11 @@ public sealed class ApplicationEndpointsTests : IClassFixture<WebApplicationFact
         Assert.NotNull(humanProjection);
         Assert.Equal(ProjectionTarget.Agent, agentProjection!.Target);
         Assert.Equal(ProjectionTarget.Human, humanProjection!.Target);
-        Assert.Contains(agentProjection.Sections, section => section.Id == "agent-only-illustration");
-        Assert.DoesNotContain(agentProjection.Sections, section => section.Id == "human-only-illustration");
-        Assert.Contains(humanProjection.Sections, section => section.Id == "human-only-illustration");
-        Assert.Contains(agentProjection.Tools, tool => tool.Id == "runtime-substrate");
-        Assert.Contains(agentProjection.Actions, action => action.ActionId == "advance-workflow");
+        Assert.Contains(agentProjection.Sections, section => section.Id == "agent-review-focus");
+        Assert.DoesNotContain(agentProjection.Sections, section => section.Id == "reviewer-notes");
+        Assert.Contains(humanProjection.Sections, section => section.Id == "reviewer-notes");
+        Assert.Contains(agentProjection.Tools, tool => tool.Id == "inspect-item-context");
+        Assert.Contains(agentProjection.Actions, action => action.ActionId == "start-review");
     }
 
     [Fact]
@@ -123,9 +128,10 @@ public sealed class ApplicationEndpointsTests : IClassFixture<WebApplicationFact
         Assert.Equal("text/html", response.Content.Headers.ContentType?.MediaType);
         Assert.Contains("Agent Surface Debug", content);
         Assert.Contains("Current Projection", content);
-        Assert.Contains("section:agent-only-illustration", content);
-        Assert.Contains("tool:runtime-substrate", content);
-        Assert.Contains("action:advance-workflow", content);
+        Assert.Contains("Review Submitted Item", content);
+        Assert.Contains("section:agent-review-focus", content);
+        Assert.Contains("tool:inspect-item-context", content);
+        Assert.Contains("action:start-review", content);
         Assert.Contains("&lt;context-interface-application consumer=&quot;agent&quot;&gt;", content);
         Assert.Contains("current agent-facing payload", content);
     }
@@ -152,30 +158,34 @@ public sealed class ApplicationEndpointsTests : IClassFixture<WebApplicationFact
 
         var initialState = await client.GetFromJsonAsync<ContextInterfaceState>("/api/state");
         Assert.NotNull(initialState);
-        Assert.Equal("intent-anchoring", initialState!.CurrentStep.Id);
+        Assert.Equal("new-item", initialState!.CurrentStep.Id);
+        Assert.Equal("item-4821", initialState.CurrentItem.Id);
+        Assert.Equal("new", initialState.CurrentItem.Status);
 
         var actionResponse = await client.PostAsJsonAsync(
             "/api/agent/actions",
-            new AgentActionRequest("advance-workflow", initialState.CurrentStep.Id));
+            new AgentActionRequest("start-review", initialState.CurrentStep.Id));
 
         actionResponse.EnsureSuccessStatusCode();
 
         var actionResult = await actionResponse.Content.ReadFromJsonAsync<AgentActionResult>();
         Assert.NotNull(actionResult);
         Assert.True(actionResult!.Accepted);
-        Assert.Equal("shared-state-projection", actionResult.CurrentState.CurrentStep.Id);
-        Assert.Contains("inspect-dual-projection", actionResult.CurrentState.CurrentVisibleToolIds);
-        Assert.DoesNotContain("runtime-substrate", actionResult.CurrentState.CurrentVisibleToolIds);
-        Assert.Contains("advance-workflow", actionResult.CurrentState.CurrentAvailableActionIds);
+        Assert.Equal("in-review", actionResult.CurrentState.CurrentStep.Id);
+        Assert.Equal("in_review", actionResult.CurrentState.CurrentItem.Status);
+        Assert.Contains("inspect-review-history", actionResult.CurrentState.CurrentVisibleToolIds);
+        Assert.DoesNotContain("inspect-item-context", actionResult.CurrentState.CurrentVisibleToolIds);
+        Assert.Contains("approve-item", actionResult.CurrentState.CurrentAvailableActionIds);
+        Assert.Contains("request-followup", actionResult.CurrentState.CurrentAvailableActionIds);
 
         var humanSurface = await client.GetStringAsync("/");
         var agentSurface = await client.GetStringAsync("/agent/surface");
 
-        Assert.Contains("Define shared canonical state and visible dual surfaces.", humanSurface);
-        Assert.Contains("<step id=\"shared-state-projection\">", agentSurface);
-        Assert.Contains("step-id=\"shared-state-projection\"", agentSurface);
-        Assert.Contains("Inspect Dual Projection", humanSurface);
-        Assert.Contains("<label>Inspect Dual Projection</label>", agentSurface);
+        Assert.Contains("Evaluate the item in active review.", humanSurface);
+        Assert.Contains("<step id=\"in-review\">", agentSurface);
+        Assert.Contains("step-id=\"in-review\"", agentSurface);
+        Assert.Contains("Inspect Review History", humanSurface);
+        Assert.Contains("<label>Inspect Review History</label>", agentSurface);
         Assert.Contains("source-component=\"FoundationalDemoAction\"", agentSurface);
     }
 
@@ -194,7 +204,7 @@ public sealed class ApplicationEndpointsTests : IClassFixture<WebApplicationFact
         Assert.NotNull(result);
         Assert.False(result!.Accepted);
         Assert.Contains("no longer current", result.Message);
-        Assert.Equal("intent-anchoring", result.CurrentState.CurrentStep.Id);
+        Assert.Equal("new-item", result.CurrentState.CurrentStep.Id);
     }
 
     [Fact]
@@ -204,37 +214,39 @@ public sealed class ApplicationEndpointsTests : IClassFixture<WebApplicationFact
 
         var initialState = await client.GetFromJsonAsync<ContextInterfaceState>("/api/state");
         Assert.NotNull(initialState);
-        Assert.Contains("runtime-substrate", initialState!.CurrentVisibleToolIds);
-        Assert.DoesNotContain("inspect-dual-projection", initialState.CurrentVisibleToolIds);
-        Assert.DoesNotContain("inspect-replay", initialState.CurrentVisibleToolIds);
-        Assert.Contains("advance-workflow", initialState.CurrentAvailableActionIds);
+        Assert.Contains("inspect-item-context", initialState!.CurrentVisibleToolIds);
+        Assert.DoesNotContain("inspect-review-history", initialState.CurrentVisibleToolIds);
+        Assert.DoesNotContain("inspect-followup-guidance", initialState.CurrentVisibleToolIds);
+        Assert.Contains("start-review", initialState.CurrentAvailableActionIds);
 
         var firstAdvance = await client.PostAsJsonAsync(
             "/api/agent/actions",
-            new AgentActionRequest("advance-workflow", initialState.CurrentStep.Id));
+            new AgentActionRequest("start-review", initialState.CurrentStep.Id));
         firstAdvance.EnsureSuccessStatusCode();
 
         var sharedProjectionState = await firstAdvance.Content.ReadFromJsonAsync<AgentActionResult>();
         Assert.NotNull(sharedProjectionState);
-        Assert.Contains("inspect-dual-projection", sharedProjectionState!.CurrentState.CurrentVisibleToolIds);
-        Assert.DoesNotContain("runtime-substrate", sharedProjectionState.CurrentState.CurrentVisibleToolIds);
-        Assert.Contains("advance-workflow", sharedProjectionState.CurrentState.CurrentAvailableActionIds);
+        Assert.Contains("inspect-review-history", sharedProjectionState!.CurrentState.CurrentVisibleToolIds);
+        Assert.DoesNotContain("inspect-item-context", sharedProjectionState.CurrentState.CurrentVisibleToolIds);
+        Assert.Contains("approve-item", sharedProjectionState.CurrentState.CurrentAvailableActionIds);
+        Assert.Contains("request-followup", sharedProjectionState.CurrentState.CurrentAvailableActionIds);
 
         var secondAdvance = await client.PostAsJsonAsync(
             "/api/agent/actions",
-            new AgentActionRequest("advance-workflow", sharedProjectionState.CurrentState.CurrentStep.Id));
+            new AgentActionRequest("request-followup", sharedProjectionState.CurrentState.CurrentStep.Id));
         secondAdvance.EnsureSuccessStatusCode();
 
         var replayState = await secondAdvance.Content.ReadFromJsonAsync<AgentActionResult>();
         Assert.NotNull(replayState);
-        Assert.Equal("replay-capture", replayState!.CurrentState.CurrentStep.Id);
-        Assert.Contains("inspect-replay", replayState.CurrentState.CurrentVisibleToolIds);
-        Assert.DoesNotContain("advance-workflow", replayState.CurrentState.CurrentVisibleToolIds);
-        Assert.Contains("reset-workflow", replayState.CurrentState.CurrentAvailableActionIds);
+        Assert.Equal("needs-followup", replayState!.CurrentState.CurrentStep.Id);
+        Assert.Equal("needs_followup", replayState.CurrentState.CurrentItem.Status);
+        Assert.Contains("inspect-followup-guidance", replayState.CurrentState.CurrentVisibleToolIds);
+        Assert.DoesNotContain("approve-item", replayState.CurrentState.CurrentAvailableActionIds);
+        Assert.Contains("resume-review", replayState.CurrentState.CurrentAvailableActionIds);
     }
 
     [Fact]
-    public async Task ReplayStep_UsesReplayCaptureComponentAndCanResetWorkflow()
+    public async Task ApprovedStep_UsesApprovalSurfaceAndCanReopenReview()
     {
         using var client = CreateClient();
 
@@ -243,31 +255,31 @@ public sealed class ApplicationEndpointsTests : IClassFixture<WebApplicationFact
 
         var firstAdvance = await client.PostAsJsonAsync(
             "/api/agent/actions",
-            new AgentActionRequest("advance-workflow", initialState!.CurrentStep.Id));
+            new AgentActionRequest("start-review", initialState!.CurrentStep.Id));
         firstAdvance.EnsureSuccessStatusCode();
         var sharedProjectionState = await firstAdvance.Content.ReadFromJsonAsync<AgentActionResult>();
         Assert.NotNull(sharedProjectionState);
 
         var secondAdvance = await client.PostAsJsonAsync(
             "/api/agent/actions",
-            new AgentActionRequest("advance-workflow", sharedProjectionState!.CurrentState.CurrentStep.Id));
+            new AgentActionRequest("approve-item", sharedProjectionState!.CurrentState.CurrentStep.Id));
         secondAdvance.EnsureSuccessStatusCode();
 
-        var replayHumanSurface = await client.GetStringAsync("/");
-        var replayAgentSurface = await client.GetStringAsync("/agent/surface");
+        var approvedHumanSurface = await client.GetStringAsync("/");
+        var approvedAgentSurface = await client.GetStringAsync("/agent/surface");
 
-        Assert.Contains("Replay Capture Action", replayHumanSurface);
-        Assert.Contains("action-id=\"reset-workflow\"", replayAgentSurface);
-        Assert.Contains("source-component=\"ReplayCaptureAction\"", replayAgentSurface);
+        Assert.Contains("Approval Summary", approvedHumanSurface);
+        Assert.Contains("action-id=\"reopen-review\"", approvedAgentSurface);
+        Assert.Contains("source-component=\"ReplayCaptureAction\"", approvedAgentSurface);
 
         var resetResponse = await client.PostAsJsonAsync(
             "/api/agent/actions",
-            new AgentActionRequest("reset-workflow", "replay-capture"));
+            new AgentActionRequest("reopen-review", "approved"));
         resetResponse.EnsureSuccessStatusCode();
 
         var resetResult = await resetResponse.Content.ReadFromJsonAsync<AgentActionResult>();
         Assert.NotNull(resetResult);
-        Assert.Equal("intent-anchoring", resetResult!.CurrentState.CurrentStep.Id);
+        Assert.Equal("in-review", resetResult!.CurrentState.CurrentStep.Id);
     }
 
     [Fact]
@@ -280,7 +292,7 @@ public sealed class ApplicationEndpointsTests : IClassFixture<WebApplicationFact
 
         var actionResponse = await client.PostAsJsonAsync(
             "/api/agent/actions",
-            new AgentActionRequest("advance-workflow", initialState!.CurrentStep.Id));
+            new AgentActionRequest("start-review", initialState!.CurrentStep.Id));
         actionResponse.EnsureSuccessStatusCode();
 
         var transitionResponse = await client.GetAsync("/api/replay/transitions/latest");
@@ -288,16 +300,16 @@ public sealed class ApplicationEndpointsTests : IClassFixture<WebApplicationFact
 
         var transition = await transitionResponse.Content.ReadFromJsonAsync<TransitionArtifact>();
         Assert.NotNull(transition);
-        Assert.Equal("advance-workflow", transition!.ActionId);
-        Assert.Equal("intent-anchoring", transition.FromStepId);
-        Assert.Equal("shared-state-projection", transition.ToStepId);
-        Assert.Contains("step-id=\"intent-anchoring\"", transition.BeforeSurface.Content);
-        Assert.Contains("step-id=\"shared-state-projection\"", transition.AfterSurface.Content);
-        Assert.Equal("intent-anchoring", transition.BeforeSnapshot.Root.Children.Single(child => child.NodeType == "workflow").Children.Single(child => child.NodeType == "step").Id);
-        Assert.Equal("shared-state-projection", transition.AfterSnapshot.Root.Children.Single(child => child.NodeType == "workflow").Children.Single(child => child.NodeType == "step").Id);
+        Assert.Equal("start-review", transition!.ActionId);
+        Assert.Equal("new-item", transition.FromStepId);
+        Assert.Equal("in-review", transition.ToStepId);
+        Assert.Contains("step-id=\"new-item\"", transition.BeforeSurface.Content);
+        Assert.Contains("step-id=\"in-review\"", transition.AfterSurface.Content);
+        Assert.Equal("new-item", transition.BeforeSnapshot.Root.Children.Single(child => child.NodeType == "workflow").Children.Single(child => child.NodeType == "step").Id);
+        Assert.Equal("in-review", transition.AfterSnapshot.Root.Children.Single(child => child.NodeType == "workflow").Children.Single(child => child.NodeType == "step").Id);
         Assert.Contains(
             transition.BeforeSnapshot.Root.Children.Single(child => child.NodeType == "workflow").Children.Single(child => child.NodeType == "available-actions").Children,
-            child => child.Id == "advance-workflow");
+            child => child.Id == "start-review");
     }
 
     [Fact]
@@ -307,22 +319,22 @@ public sealed class ApplicationEndpointsTests : IClassFixture<WebApplicationFact
 
         var toolResponse = await client.PostAsJsonAsync(
             "/api/tools/call",
-            new ToolInvocationRequest("runtime-substrate", "intent-anchoring"));
+            new ToolInvocationRequest("inspect-item-context", "new-item"));
         toolResponse.EnsureSuccessStatusCode();
 
         var toolResult = await toolResponse.Content.ReadFromJsonAsync<ToolInvocationResult>();
         Assert.NotNull(toolResult);
         Assert.True(toolResult!.Succeeded);
-        Assert.Equal("runtime-substrate", toolResult.ToolId);
+        Assert.Equal("inspect-item-context", toolResult.ToolId);
         Assert.NotNull(toolResult.ProjectedResult);
-        Assert.Equal("Runtime substrate", toolResult.ProjectedResult!.Label);
+        Assert.Equal("Item context", toolResult.ProjectedResult!.Label);
 
         var updatedState = await client.GetFromJsonAsync<ContextInterfaceState>("/api/state");
         Assert.NotNull(updatedState);
-        Assert.Equal("Runtime substrate", updatedState!.RecentResults[0].Label);
+        Assert.Equal("Item context", updatedState!.RecentResults[0].Label);
 
         var humanSurface = await client.GetStringAsync("/");
-        Assert.Contains("Runtime substrate", humanSurface);
+        Assert.Contains("Item context", humanSurface);
     }
 
     [Fact]
@@ -332,7 +344,7 @@ public sealed class ApplicationEndpointsTests : IClassFixture<WebApplicationFact
 
         var toolResponse = await client.PostAsJsonAsync(
             "/api/tools/call",
-            new ToolInvocationRequest("inspect-replay", "intent-anchoring"));
+            new ToolInvocationRequest("inspect-followup-guidance", "new-item"));
 
         Assert.Equal(HttpStatusCode.Conflict, toolResponse.StatusCode);
 

@@ -4,8 +4,8 @@
 @if (Target == ProjectionTarget.Human)
 {
     <section>
-        <h2>Replay Capture Action</h2>
-        <p><strong>@Action.ActionId</strong> is authored from the replay capture component for this step.</p>
+        <h2>Follow-Up Action</h2>
+        <p><strong>@Action.ActionId</strong> is available for the current follow-up or approval state.</p>
         <p>@Action.Description</p>
         <p class="muted">Expected result: @Action.Result</p>
         <button type="button" disabled>@Action.ActionId</button>

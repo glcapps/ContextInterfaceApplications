@@ -7,23 +7,23 @@ public partial class IntentAnchoringStepSurface
     internal static IReadOnlyList<SurfaceSectionDefinition> GetSections() =>
     [
         new SurfaceSectionDefinition(
-            "human-only-illustration",
-            "Human-Only Illustration",
-            "This panel exists only in the human-facing surface and demonstrates consumer-specific UI.",
+            "reviewer-notes",
+            "Reviewer Notes",
+            "This panel gives the human reviewer a quick note about starting the review from a new item state.",
             SurfaceSectionVisibility.HumanOnly,
             "stable",
             nameof(IntentAnchoringStepSurface)),
         new SurfaceSectionDefinition(
-            "agent-only-illustration",
-            "Agent-Only Illustration",
-            "This section exists only in the agent-facing surface and demonstrates consumer-specific interface projection.",
+            "agent-review-focus",
+            "Agent Review Focus",
+            "This section gives the agent a review-oriented summary of what matters at the start of item review.",
             SurfaceSectionVisibility.AgentOnly,
             "stable",
             nameof(IntentAnchoringStepSurface)),
         new SurfaceSectionDefinition(
-            "shared-illustration",
-            "Shared Illustration",
-            "This authored section is shared by both projections and rendered through the same component metadata.",
+            "shared-review-brief",
+            "Shared Review Brief",
+            "This shared section keeps both surfaces aligned on the current item and its initial review objective.",
             SurfaceSectionVisibility.Shared,
             "stable",
             nameof(IntentAnchoringStepSurface))

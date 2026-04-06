@@ -7,9 +7,9 @@ public partial class ReplayCaptureStepSurface
     internal static IReadOnlyList<SurfaceSectionDefinition> GetSections() =>
     [
         new SurfaceSectionDefinition(
-            "replay-inspection",
-            "Replay Inspection",
-            "This step is where transition artifacts become the main debugging surface.",
+            "followup-review-guidance",
+            "Follow-Up Review Guidance",
+            "This step keeps the item visible while waiting for follow-up before review resumes.",
             SurfaceSectionVisibility.Shared,
             "volatile",
             nameof(ReplayCaptureStepSurface))

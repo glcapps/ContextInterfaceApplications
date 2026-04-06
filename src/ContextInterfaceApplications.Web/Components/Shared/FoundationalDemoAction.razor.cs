@@ -8,34 +8,34 @@ public partial class FoundationalDemoAction
     public static IReadOnlyList<AuthoredToolContract> GetAuthoredToolsForStep(string stepId) =>
         stepId switch
         {
-            "intent-anchoring" =>
+            "new-item" =>
             [
                 new AuthoredToolContract(
-                    "advance-workflow",
-                    "Advance Workflow",
+                    "inspect-item-context",
+                    "Inspect Item Context",
                     "application-surface",
-                    "Move to the next explicit step in the proof-of-concept flow.",
+                    "Review the summary and detail currently visible for this item.",
                     "FoundationalDemoAction"),
                 new AuthoredToolContract(
-                    "runtime-substrate",
-                    "Inspect Runtime Substrate",
-                    "runtime",
-                    "Check the Microsoft Agent Framework registration without handing it workflow ownership.",
+                    "inspect-review-policy",
+                    "Inspect Review Policy",
+                    "application-surface",
+                    "Review the generic criteria used to start item review.",
                     "FoundationalDemoAction")
             ],
-            "shared-state-projection" =>
+            "in-review" =>
             [
                 new AuthoredToolContract(
-                    "advance-workflow",
-                    "Advance Workflow",
+                    "inspect-review-history",
+                    "Inspect Review History",
                     "application-surface",
-                    "Move from shared-state projection to replay capture.",
+                    "Review the most recent projected notes and prior review context.",
                     "FoundationalDemoAction"),
                 new AuthoredToolContract(
-                    "inspect-dual-projection",
-                    "Inspect Dual Projection",
+                    "inspect-review-policy",
+                    "Inspect Review Policy",
                     "application-surface",
-                    "Compare the shared human and agent render targets for the current step.",
+                    "Review the generic criteria used to approve or request follow-up.",
                     "FoundationalDemoAction")
             ],
             _ => []
@@ -44,22 +44,28 @@ public partial class FoundationalDemoAction
     public static IReadOnlyList<AuthoredActionContract> GetAuthoredActionsForStep(string stepId) =>
         stepId switch
         {
-            "intent-anchoring" =>
+            "new-item" =>
             [
                 new AuthoredActionContract(
-                    "advance-workflow",
-                    "intent-anchoring",
-                    "Advance from intent anchoring into the shared-state projection step.",
-                    "The next rendered surfaces expose dual-projection inspection.",
+                    "start-review",
+                    "new-item",
+                    "Start reviewing this item from its initial new state.",
+                    "The item moves into active review with approval and follow-up decisions available.",
                     "FoundationalDemoAction")
             ],
-            "shared-state-projection" =>
+            "in-review" =>
             [
                 new AuthoredActionContract(
-                    "advance-workflow",
-                    "shared-state-projection",
-                    "Advance from shared-state projection into replay capture.",
-                    "The next rendered surfaces expose replay inspection instead of projection comparison.",
+                    "approve-item",
+                    "in-review",
+                    "Approve the item and complete the current review pass.",
+                    "The item moves into the approved state.",
+                    "FoundationalDemoAction"),
+                new AuthoredActionContract(
+                    "request-followup",
+                    "in-review",
+                    "Request more information or changes before final approval.",
+                    "The item moves into a needs-follow-up state.",
                     "FoundationalDemoAction")
             ],
             _ => []

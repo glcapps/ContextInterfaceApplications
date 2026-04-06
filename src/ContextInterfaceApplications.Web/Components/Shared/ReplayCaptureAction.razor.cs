@@ -8,19 +8,34 @@ public partial class ReplayCaptureAction
     public static IReadOnlyList<AuthoredToolContract> GetAuthoredToolsForStep(string stepId) =>
         stepId switch
         {
-            "replay-capture" =>
+            "needs-followup" =>
             [
                 new AuthoredToolContract(
-                    "inspect-replay",
-                    "Inspect Replay Artifact",
+                    "inspect-followup-guidance",
+                    "Inspect Follow-Up Guidance",
                     "application-surface",
-                    "Retrieve the latest agent-visible interface snapshot.",
+                    "Review the current follow-up expectation before resuming review.",
                     "ReplayCaptureAction"),
                 new AuthoredToolContract(
-                    "reset-workflow",
-                    "Reset Workflow",
+                    "inspect-review-history",
+                    "Inspect Review History",
                     "application-surface",
-                    "Return to the first step after validating replay capture.",
+                    "Review the recent projected review notes while follow-up is pending.",
+                    "ReplayCaptureAction")
+            ],
+            "approved" =>
+            [
+                new AuthoredToolContract(
+                    "inspect-review-history",
+                    "Inspect Review History",
+                    "application-surface",
+                    "Review the projected results that led to approval.",
+                    "ReplayCaptureAction"),
+                new AuthoredToolContract(
+                    "inspect-item-context",
+                    "Inspect Item Context",
+                    "application-surface",
+                    "Re-read the approved item summary and detail.",
                     "ReplayCaptureAction")
             ],
             _ => []
@@ -29,13 +44,22 @@ public partial class ReplayCaptureAction
     public static IReadOnlyList<AuthoredActionContract> GetAuthoredActionsForStep(string stepId) =>
         stepId switch
         {
-            "replay-capture" =>
+            "needs-followup" =>
             [
                 new AuthoredActionContract(
-                    "reset-workflow",
-                    "replay-capture",
-                    "Reset the workflow after replay inspection back to the first step.",
-                    "The next rendered surfaces return to intent anchoring.",
+                    "resume-review",
+                    "needs-followup",
+                    "Resume review after follow-up information is considered ready.",
+                    "The item returns to active review.",
+                    "ReplayCaptureAction")
+            ],
+            "approved" =>
+            [
+                new AuthoredActionContract(
+                    "reopen-review",
+                    "approved",
+                    "Reopen the item for another review pass.",
+                    "The item returns to active review.",
                     "ReplayCaptureAction")
             ],
             _ => []

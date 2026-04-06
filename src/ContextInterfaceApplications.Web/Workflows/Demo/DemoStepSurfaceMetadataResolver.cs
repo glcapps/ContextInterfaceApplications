@@ -10,9 +10,10 @@ public sealed class DemoStepSurfaceMetadataResolver : IStepSurfaceMetadataResolv
     {
         var sections = stepId switch
         {
-            "intent-anchoring" => IntentAnchoringStepSurface.GetSections(),
-            "shared-state-projection" => SharedStateProjectionStepSurface.GetSections(),
-            "replay-capture" => ReplayCaptureStepSurface.GetSections(),
+            "new-item" => IntentAnchoringStepSurface.GetSections(),
+            "in-review" => SharedStateProjectionStepSurface.GetSections(),
+            "needs-followup" => ReplayCaptureStepSurface.GetSections(),
+            "approved" => ApprovedStepSurface.GetSections(),
             _ => []
         };
 

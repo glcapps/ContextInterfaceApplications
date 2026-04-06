@@ -4,8 +4,8 @@
 @if (Target == ProjectionTarget.Human)
 {
     <section>
-        <h2>Foundational Demo Action</h2>
-        <p><strong>@Action.ActionId</strong> is authored from a shared Blazor component and exposed on this step.</p>
+        <h2>Review Action</h2>
+        <p><strong>@Action.ActionId</strong> is available for the current review state.</p>
         <p>@Action.Description</p>
         <p class="muted">Expected result: @Action.Result</p>
         <button type="button" disabled>@Action.ActionId</button>
