@@ -1,5 +1,9 @@
 # Context Interface Applications, The Interface Moves Inside the Model
 
+## TL;DR
+
+Software already knows how to guide people: show the right state, constrain the right actions, and make the next valid step obvious. Context Interface Applications apply that same discipline to agents. The model should not be handed a giant prompt blob and told to cope; it should be shown a projected application surface with visible state, scoped tools, explicit workflow position, and constrained transitions. The hard problem is not storing more information but projecting the correct slice of state into the context window at the correct moment. Context is therefore not just payload but interface; hallucination is often interface ambiguity; determinism comes more from constrained surfaces than from model tuning; and XHTML-like structure is unusually powerful because both web tooling and model training already treat it as first-class. In short: context engineering curates tokens, while Context Interface Applications render an oriented work surface for the model.
+
 ## Framing the Shift
 1. From UI to Context: Where the Interface Went
 
