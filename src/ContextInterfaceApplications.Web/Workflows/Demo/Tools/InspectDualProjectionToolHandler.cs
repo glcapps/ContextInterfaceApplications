@@ -15,7 +15,7 @@ public sealed class InspectDualProjectionToolHandler : IContextToolHandler
             "Dual projection inspection projected into interface state.",
             new ProjectedResult(
                 "Dual projection inspection",
-                $"Step '{state.CurrentStep.Id}' exposes {state.VisibleTools.Count} visible tools and {state.AvailableAgentActions.Count} agent actions from shared authored structure.",
+                $"Step '{state.CurrentStep.Id}' exposes {state.CurrentVisibleToolIds.Count} visible tools and {state.CurrentAvailableActionIds.Count} agent actions from shared authored structure.",
                 DateTimeOffset.UtcNow)));
     }
 }

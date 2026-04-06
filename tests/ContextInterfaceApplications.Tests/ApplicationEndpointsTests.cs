@@ -141,10 +141,9 @@ public sealed class ApplicationEndpointsTests : IClassFixture<WebApplicationFact
         Assert.NotNull(actionResult);
         Assert.True(actionResult!.Accepted);
         Assert.Equal("shared-state-projection", actionResult.CurrentState.CurrentStep.Id);
-        Assert.Contains(actionResult.CurrentState.VisibleTools, tool => tool.Id == "inspect-dual-projection");
-        Assert.DoesNotContain(actionResult.CurrentState.VisibleTools, tool => tool.Id == "runtime-substrate");
-        Assert.Contains(actionResult.CurrentState.AvailableAgentActions, action => action.StepId == "shared-state-projection");
-        Assert.All(actionResult.CurrentState.AvailableAgentActions, action => Assert.Equal("FoundationalDemoAction", action.SourceComponent));
+        Assert.Contains("inspect-dual-projection", actionResult.CurrentState.CurrentVisibleToolIds);
+        Assert.DoesNotContain("runtime-substrate", actionResult.CurrentState.CurrentVisibleToolIds);
+        Assert.Contains("advance-workflow", actionResult.CurrentState.CurrentAvailableActionIds);
 
         var humanSurface = await client.GetStringAsync("/");
         var agentSurface = await client.GetStringAsync("/agent/surface");
@@ -182,11 +181,10 @@ public sealed class ApplicationEndpointsTests : IClassFixture<WebApplicationFact
 
         var initialState = await client.GetFromJsonAsync<ContextInterfaceState>("/api/state");
         Assert.NotNull(initialState);
-        Assert.Contains(initialState!.VisibleTools, tool => tool.Id == "runtime-substrate");
-        Assert.DoesNotContain(initialState.VisibleTools, tool => tool.Id == "inspect-dual-projection");
-        Assert.DoesNotContain(initialState.VisibleTools, tool => tool.Id == "inspect-replay");
-        Assert.Contains(initialState.AvailableAgentActions, action => action.StepId == "intent-anchoring");
-        Assert.All(initialState.VisibleTools, tool => Assert.Equal("FoundationalDemoAction", tool.SourceComponent));
+        Assert.Contains("runtime-substrate", initialState!.CurrentVisibleToolIds);
+        Assert.DoesNotContain("inspect-dual-projection", initialState.CurrentVisibleToolIds);
+        Assert.DoesNotContain("inspect-replay", initialState.CurrentVisibleToolIds);
+        Assert.Contains("advance-workflow", initialState.CurrentAvailableActionIds);
 
         var firstAdvance = await client.PostAsJsonAsync(
             "/api/agent/actions",
@@ -195,10 +193,9 @@ public sealed class ApplicationEndpointsTests : IClassFixture<WebApplicationFact
 
         var sharedProjectionState = await firstAdvance.Content.ReadFromJsonAsync<AgentActionResult>();
         Assert.NotNull(sharedProjectionState);
-        Assert.Contains(sharedProjectionState!.CurrentState.VisibleTools, tool => tool.Id == "inspect-dual-projection");
-        Assert.DoesNotContain(sharedProjectionState.CurrentState.VisibleTools, tool => tool.Id == "runtime-substrate");
-        Assert.Contains(sharedProjectionState.CurrentState.AvailableAgentActions, action => action.StepId == "shared-state-projection");
-        Assert.All(sharedProjectionState.CurrentState.VisibleTools, tool => Assert.Equal("FoundationalDemoAction", tool.SourceComponent));
+        Assert.Contains("inspect-dual-projection", sharedProjectionState!.CurrentState.CurrentVisibleToolIds);
+        Assert.DoesNotContain("runtime-substrate", sharedProjectionState.CurrentState.CurrentVisibleToolIds);
+        Assert.Contains("advance-workflow", sharedProjectionState.CurrentState.CurrentAvailableActionIds);
 
         var secondAdvance = await client.PostAsJsonAsync(
             "/api/agent/actions",
@@ -208,11 +205,9 @@ public sealed class ApplicationEndpointsTests : IClassFixture<WebApplicationFact
         var replayState = await secondAdvance.Content.ReadFromJsonAsync<AgentActionResult>();
         Assert.NotNull(replayState);
         Assert.Equal("replay-capture", replayState!.CurrentState.CurrentStep.Id);
-        Assert.Contains(replayState.CurrentState.VisibleTools, tool => tool.Id == "inspect-replay");
-        Assert.DoesNotContain(replayState.CurrentState.VisibleTools, tool => tool.Id == "advance-workflow");
-        Assert.Contains(replayState.CurrentState.AvailableAgentActions, action => action.ActionId == "reset-workflow");
-        Assert.All(replayState.CurrentState.VisibleTools, tool => Assert.Equal("ReplayCaptureAction", tool.SourceComponent));
-        Assert.All(replayState.CurrentState.AvailableAgentActions, action => Assert.Equal("ReplayCaptureAction", action.SourceComponent));
+        Assert.Contains("inspect-replay", replayState.CurrentState.CurrentVisibleToolIds);
+        Assert.DoesNotContain("advance-workflow", replayState.CurrentState.CurrentVisibleToolIds);
+        Assert.Contains("reset-workflow", replayState.CurrentState.CurrentAvailableActionIds);
     }
 
     [Fact]

@@ -180,7 +180,7 @@ app.MapPost("/api/tools/call", async (
             null));
     }
 
-    if (!currentState.VisibleTools.Any(tool => string.Equals(tool.Id, request.ToolId, StringComparison.Ordinal)))
+    if (!currentState.CurrentVisibleToolIds.Contains(request.ToolId, StringComparer.Ordinal))
     {
         return Results.Conflict(new ToolInvocationResult(
             false,

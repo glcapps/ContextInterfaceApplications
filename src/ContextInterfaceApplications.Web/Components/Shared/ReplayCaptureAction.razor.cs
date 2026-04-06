@@ -41,12 +41,6 @@ public partial class ReplayCaptureAction
             _ => []
         };
 
-    public static IReadOnlyList<VisibleTool> GetToolsForStep(string stepId) =>
-        GetAuthoredToolsForStep(stepId).Select(tool => tool.ToVisibleTool()).ToArray();
-
-    public static IReadOnlyList<AgentActionDescriptor> GetContractsForStep(string stepId) =>
-        GetAuthoredActionsForStep(stepId).Select(action => action.ToAgentActionDescriptor()).ToArray();
-
     [Parameter, EditorRequired]
     public required AuthoredActionContract Action { get; set; }
 

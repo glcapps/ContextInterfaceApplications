@@ -44,9 +44,6 @@ public sealed class DemoWorkflowDefinition : IWorkflowDefinition
 
     public AgentActionResult ApplyAction(ContextInterfaceState currentState, AgentActionRequest request)
     {
-        var matchingAction = currentState.AvailableAgentActions
-            .SingleOrDefault(action => string.Equals(action.ActionId, request.ActionId, StringComparison.Ordinal));
-
         if (!string.Equals(request.StepId, currentState.CurrentStep.Id, StringComparison.Ordinal))
         {
             return new AgentActionResult(
@@ -55,7 +52,7 @@ public sealed class DemoWorkflowDefinition : IWorkflowDefinition
                 currentState);
         }
 
-        if (matchingAction is null)
+        if (!currentState.CurrentAvailableActionIds.Contains(request.ActionId, StringComparer.Ordinal))
         {
             return new AgentActionResult(
                 false,
@@ -86,8 +83,8 @@ public sealed class DemoWorkflowDefinition : IWorkflowDefinition
             "Context Interface Applications",
             "Proof of Concept Bootstrap",
             new WorkflowStep(stepId, title, decision, nextValidAction),
-            _affordanceResolver.GetTools(stepId).Select(tool => tool.ToVisibleTool()).ToArray(),
-            _affordanceResolver.GetActions(stepId).Select(action => action.ToAgentActionDescriptor()).ToArray(),
+            _affordanceResolver.GetTools(stepId).Select(tool => tool.Id).ToArray(),
+            _affordanceResolver.GetActions(stepId).Select(action => action.ActionId).ToArray(),
             new[]
             {
                 new ProjectedResult(
