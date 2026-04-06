@@ -54,7 +54,7 @@
 ## Context Interface Applications
 	13.	What Is a Context Interface Application?
 
-	A Context Interface Application designs the model’s working context as the primary interface. It defines what is visible, how it is structured, what actions are allowed, how workflows advance, and which state persists across steps. The system renders context per step, not a single static prompt. State, tools, goals, constraints, transitions, and relevant results are explicit nodes, not implicit text. The application surface is the composed context, not just UI or API endpoints.
+	A Context Interface Application designs the model’s working context as the primary interface. It defines what is visible, how it is structured, what actions are allowed, how workflows advance, and which state persists across steps. The system renders context per step, not a single static prompt. State, tools, goals, constraints, transitions, and relevant results are explicit nodes, not implicit text. The application surface is the composed context, not just UI or API endpoints. Clear interface boundaries also permit clean context switching between applications or tasks by replacing one oriented work surface with another instead of blending them into a single ambiguous window.
 
 	14.	The Interface as Context, Not UI or API
 
@@ -68,14 +68,14 @@
 
 	Constraints define behavior. Limit actions to scoped tools, gate inputs with schemas, fix workflow steps where repeatability matters, and make state explicit. Prefer whitelists over open text, explicit transitions over free-form reasoning, and small, local contexts over global blobs. Encode invariants in step definitions, tool contracts, and projection rules. Reliability comes from reducing the action space and clarifying state, not from stronger prompts. Flexibility can remain where applications need it, but it should appear as controlled branching rather than unrestricted exposure.
 
-## DOM Thinking for Agents (ForageMap Perspective)
+## DOM Thinking for Agents ([ForageMap](https://github.com/glcapps/ForageMap) Perspective)
 	17.	Dual DOM Architecture: Human vs Machine Interfaces
 
-	Maintain dual interfaces from shared state: human DOM and machine (context) DOM. Each renders a different surface with the same intent but different consumers. Synchronize updates, avoid drift, define which changes originate where, and control projection between the two. The machine DOM encodes workflow, state, constraints, and allowed actions; the human DOM presents controls, status, and feedback. Consistency requires explicit mapping between nodes, events, and transitions.
+	Maintain dual interfaces from shared state: human DOM and machine (context) DOM. Each renders a different surface with the same intent but different consumers. Synchronize updates, avoid drift, define which changes originate where, and control projection between the two. The machine DOM encodes workflow, state, constraints, and allowed actions; the human DOM presents controls, status, and feedback. Consistency requires explicit mapping between nodes, events, and transitions. Where the human surface is already web-native, sharing state and projection logic with the context interface is a natural extension of normal web application architecture rather than an exotic second system.
 
 	18.	The ForageMap DOM: Structure, State, and Workflow
 
-	Represent context as a structured tree: goals, steps, tasks, tools, notes, constraints, state snapshots, and relevant results. Nodes are addressable, composable, diffable, and selectively renderable. Build per-step views by selecting subtrees, ordering nodes, applying summarization, and projecting only relevant state and tool outputs directly into the context window. Structure enables inspection, partial updates, reuse, versioning, and replay. Serialization to tokens is a render step, not the source of truth.
+	Represent context as a structured tree: goals, steps, tasks, tools, notes, constraints, state snapshots, and relevant results. Nodes are addressable, composable, diffable, and selectively renderable. Build per-step views by selecting subtrees, ordering nodes, applying summarization, and projecting only relevant state and tool outputs directly into the context window. Structure enables inspection, partial updates, reuse, versioning, and replay. Serialization to tokens is a render step, not the source of truth. XHTML/XML is especially strong here because models are deeply trained on web and document idioms, element boundaries are naturally salient, and closing structure or outdenting helps re-establish scope.
 
 	19.	Workflow as Interface: Navigating a Map Instead of a UI
 
@@ -105,7 +105,7 @@
 ## Failure Modes and Pressure Points
 	25.	Context Bloat vs Context Loss
 
-	Context bloat and context loss are opposing failure modes. Over-inclusion dilutes signal, increases interference, raises cost, and slows iteration; under-inclusion omits required state and causes incorrect reasoning or invalid actions. Design per-step context with minimal sufficient data, ordered by importance and role. Use summaries for history, not raw logs. Treat inclusion as a budgeted architectural decision, not a convenience. Good signs are step-local state, explicit action scope, and visible constraints; warning signs are giant accumulated prompts, hidden rules, and all tools exposed at once.
+	Context bloat and context loss are opposing failure modes. Over-inclusion dilutes signal, increases interference, raises cost, and slows iteration; under-inclusion omits required state and causes incorrect reasoning or invalid actions. Design per-step context with minimal sufficient data, ordered by importance and role. Use summaries for history, not raw logs. Treat inclusion as a budgeted architectural decision, not a convenience. Good signs are step-local state, explicit action scope, and visible constraints; warning signs are giant accumulated prompts, hidden rules, and all tools exposed at once. Clean context boundaries also make switching safer by clearing residual task clutter instead of carrying chore confusion from one application surface into the next.
 
 	26.	Structure Collapse During Serialization
 
@@ -163,7 +163,7 @@
 
 	39.	What a Context Layout System Might Look Like
 
-	A context layout system parallels HTML/CSS: a structural language for nodes (goals, state, tools, constraints) and rules for ordering, grouping, emphasis, and selective rendering. It supports composition, reuse, partial rendering, and step-specific projection. No standard exists yet; systems define ad hoc schemas and render rules. What is missing is shared patterns, tooling, and inspection models concrete enough to design, build, and debug against. Layout decisions should be judged by what they make visible, local, and actionable at each step, not by textual completeness.
+	A context layout system parallels HTML/CSS: a structural language for nodes (goals, state, tools, constraints) and rules for ordering, grouping, emphasis, and selective rendering. It supports composition, reuse, partial rendering, and step-specific projection. No standard exists yet; systems define ad hoc schemas and render rules. What is missing is shared patterns, tooling, and inspection models concrete enough to design, build, and debug against. Layout decisions should be judged by what they make visible, local, and actionable at each step, not by textual completeness. XHTML/XML has unusual leverage here because authoring tools, validation, transforms, and developer habits around web structure are already mature.
 
 	40.	The Role of Application Developers in the Next Wave
 
@@ -184,7 +184,7 @@
 
 	44.	Rendering the Human DOM and the Context Interface Together
 
-	Render human DOM and context interface from shared state with explicit mappings and projection rules. Define which nodes project to UI, which to context, and which remain internal. Keep projections deterministic, idempotent, and step-scoped. Detect and resolve divergence. Treat context render as a first-class pipeline alongside UI render, with snapshots, diffs, and replay. The agent-facing visible surface should be projected directly into the context window rather than left implicit in surrounding prose.
+	Render human DOM and context interface from shared state with explicit mappings and projection rules. Define which nodes project to UI, which to context, and which remain internal. Keep projections deterministic, idempotent, and step-scoped. Detect and resolve divergence. Treat context render as a first-class pipeline alongside UI render, with snapshots, diffs, and replay. The agent-facing visible surface should be projected directly into the context window rather than left implicit in surrounding prose. Where the human application is already web-based, sharing DOM-oriented state, render rules, and transformation logic across human and agent surfaces is an immediate architectural advantage.
 
 	45.	Filesystems, Databases, and Context State Stores
 
@@ -205,8 +205,41 @@
 
 	49.	The Future of CLI, SPA, and Agent Systems
 
-	Existing forms evolve: SPAs remain for human interaction, CLIs for developer workflows, and servers for orchestration. Agent systems add a primary context interface alongside them. Integrate rather than replace: shared state, dual rendering, explicit projection, and consistent tool contracts across surfaces. The future is layered, not singular.
+	Existing forms evolve: SPAs remain for human interaction, CLIs for developer workflows, and servers for orchestration. Agent systems add a primary context interface alongside them. Integrate rather than replace: shared state, dual rendering, explicit projection, and consistent tool contracts across surfaces. The future is layered, not singular. Distinct context interfaces also make switching among applications or tasks cleaner, just as switching visible software surfaces helps people leave one decision space before entering another.
 
 	50.	The Post-UI Application Stack
 
 	The stack gains a new layer: the context interface. Below it: storage, services, policies, and tools; alongside it: UI and APIs; above it: model reasoning. Architecture centers on context construction, workflow control, state projection, replay, and constrained action surfaces. UI is not removed; it is complemented by a first-class, agent-facing interface that becomes part of normal application design, review, testing, and release discipline.
+
+## Adjacent Approaches and Industry Momentum
+	51.	Context Engineering
+
+	The dominant emerging practice treats context as a curated payload: selecting, filtering, and ordering information to fit within the window. Emphasis is on retrieval, summarization, and token budgeting. This improves relevance and cost efficiency but generally stops at information selection rather than interface design. The model is given better material, but not a structured decision surface.
+
+	52.	Structured Prompts and XML Segmentation
+
+	Many systems introduce XML-like sections or labeled blocks to improve retrieval of instructions and reduce ambiguity. These approaches add structure to prompts but typically organize instructions rather than application state, workflow, and action surfaces. The structure remains document-oriented rather than interface-oriented. XHTML/XML is stronger than simple segmentation implies: models are heavily trained on web and document idioms, element boundaries are naturally salient, closing tags and outdenting help re-establish scope, and mature validation, transformation, and authoring tooling already exists. When used as an application-facing surface rather than mere labeling, web structure becomes a first-class medium rather than a prompt-formatting trick.
+
+	53.	Tool-Augmented Agents
+
+	Tool use frameworks expand capability by exposing APIs, functions, and external systems. Momentum focuses on tool quality, schemas, and chaining. However, tools are often treated as globally available capabilities rather than scoped elements of a step-specific interface. Availability is broadened rather than intentionally narrowed.
+
+	54.	Memory and Retrieval Systems
+
+	RAG and memory systems focus on storing and retrieving relevant information across time. They address recall and continuity but do not define how retrieved information is shaped into a decision surface. The problem of projection remains implicit: retrieval decides what is available, not how it is presented.
+
+	55.	Workflow Graphs and Agent Orchestration
+
+	Graph-based and orchestrated agents model tasks as nodes, chains, or directed flows. These systems define execution paths and internal structure but often keep that structure outside the model’s visible surface. The model operates within steps but does not necessarily see a coherent interface representation of the workflow position, constraints, and actions.
+
+	56.	Agent Context Files and System Prompts
+
+	Patterns such as AGENTS.md and system prompt templates centralize instructions and environment assumptions. They improve consistency and reuse but tend to accumulate guidance rather than define a dynamic, step-scoped interface. They function as static configuration more than as rendered application surfaces.
+
+	57.	Where These Approaches Converge
+
+	These approaches converge on a shared realization: context determines behavior. They improve selection, structure, and capability, but largely treat context as data to be optimized. The missing layer is treating context as a rendered interface with explicit state, scoped actions, and workflow position visible to the model.
+
+	58.	Positioning Context Interface Applications
+
+	Context Interface Applications extend these trends by shifting from curation to construction. Instead of asking what information should be included, they ask what interface should be presented. State is projected, tools are scoped, workflow is rendered, and decisions are oriented. This reframes context from a container of tokens into an application surface designed for action. XHTML-like representations are especially attractive because they align with both sides of the problem: mature web-development practice for building the surface and strong model familiarity with web-structured content for consuming it.
