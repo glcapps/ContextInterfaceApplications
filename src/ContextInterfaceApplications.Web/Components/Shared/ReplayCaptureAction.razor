@@ -1,0 +1,20 @@
+@namespace ContextInterfaceApplications.Web.Components.Shared
+@using ContextInterfaceApplications.Web.Models
+
+@if (Target == ProjectionTarget.Human)
+{
+    <section>
+        <h2>Replay Capture Action</h2>
+        <p><strong>@Action.ActionId</strong> is authored from the replay capture component for this step.</p>
+        <p>@Action.Description</p>
+        <p class="muted">Expected result: @Action.Result</p>
+        <button type="button" disabled>@Action.ActionId</button>
+    </section>
+}
+else
+{
+    <action-contract action-id="@Action.ActionId" step-id="@Action.StepId" source-component="@Action.SourceComponent">
+        <description>@Action.Description</description>
+        <result>@Action.Result</result>
+    </action-contract>
+}

@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ContextInterfaceApplications.Runtime.Abstractions/ContextInterfaceApplications.Runtime.Abstractions.csproj" />
+    <Project Path="src/ContextInterfaceApplications.Runtime.Maf/ContextInterfaceApplications.Runtime.Maf.csproj" />
+    <Project Path="src/ContextInterfaceApplications.Web/ContextInterfaceApplications.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ContextInterfaceApplications.Tests/ContextInterfaceApplications.Tests.csproj" />
+  </Folder>
+</Solution>

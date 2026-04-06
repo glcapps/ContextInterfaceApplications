@@ -1,0 +1,35 @@
+@namespace ContextInterfaceApplications.Web.Components.Shared
+@using ContextInterfaceApplications.Web.Models
+
+@if (Target == ProjectionTarget.Human)
+{
+    <section>
+        <h2>Visible Tools</h2>
+        <ul>
+            @foreach (var tool in Tools)
+            {
+                <li><strong>@tool.Label</strong> (@tool.Scope): @tool.Description</li>
+            }
+        </ul>
+    </section>
+}
+else
+{
+    <visible-tools>
+        @foreach (var tool in Tools)
+        {
+            <tool id="@tool.Id" scope="@tool.Scope" source-component="@tool.SourceComponent">
+                <label>@tool.Label</label>
+                <description>@tool.Description</description>
+            </tool>
+        }
+    </visible-tools>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public required IReadOnlyList<VisibleTool> Tools { get; set; }
+
+    [Parameter]
+    public ProjectionTarget Target { get; set; }
+}

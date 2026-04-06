@@ -1,0 +1,35 @@
+@namespace ContextInterfaceApplications.Web.Components.Shared
+@using ContextInterfaceApplications.Web.Models
+
+@if (Target == ProjectionTarget.Human)
+{
+    <section>
+        <h2>Projected Results</h2>
+        <ul>
+            @foreach (var result in Results)
+            {
+                <li><strong>@result.Label</strong>: @result.Summary</li>
+            }
+        </ul>
+    </section>
+}
+else
+{
+    <recent-results>
+        @foreach (var result in Results)
+        {
+            <result at="@result.TimestampUtc.ToString("O")">
+                <label>@result.Label</label>
+                <summary>@result.Summary</summary>
+            </result>
+        }
+    </recent-results>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public required IReadOnlyList<ProjectedResult> Results { get; set; }
+
+    [Parameter]
+    public ProjectionTarget Target { get; set; }
+}

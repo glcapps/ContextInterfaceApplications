@@ -1,0 +1,66 @@
+@namespace ContextInterfaceApplications.Web.Components
+@using ContextInterfaceApplications.Web.Models
+@using ContextInterfaceApplications.Web.Services
+@inject IActionComponentResolver ActionComponentResolver
+@inject IStepComponentResolver StepComponentResolver
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Context Interface Applications</title>
+    <style>
+        :root { color-scheme: light; --bg: #f6f4ee; --panel: #fffdf9; --ink: #1d1c19; --accent: #005b51; --muted: #6b665f; --line: #d8d1c7; }
+        body { margin: 0; font-family: Georgia, 'Iowan Old Style', serif; background: radial-gradient(circle at top, #fffefb, var(--bg)); color: var(--ink); }
+        main { max-width: 980px; margin: 0 auto; padding: 48px 20px 64px; }
+        h1, h2 { font-weight: 600; letter-spacing: -0.02em; }
+        .grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+        section { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 20px; box-shadow: 0 12px 40px rgba(29, 28, 25, 0.06); }
+        .eyebrow { text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.78rem; color: var(--accent); }
+        .muted { color: var(--muted); }
+        ul { padding-left: 20px; }
+        code { font-family: 'SFMono-Regular', ui-monospace, monospace; }
+    </style>
+</head>
+<body>
+    <main>
+        <p class="eyebrow">@State.WorkflowName</p>
+        <h1>@State.ApplicationName</h1>
+        @if (StepComponentResolver.Resolve(State.CurrentStep.Id, ProjectionTarget.Human) is { } stepComponent)
+        {
+            <DynamicComponent Type="stepComponent"
+                              Parameters="BuildStepParameters(State, ProjectionTarget.Human)" />
+        }
+        <div class="grid">
+            <WorkflowPanel State="State" Target="ProjectionTarget.Human" />
+            <VisibleToolsPanel Tools="State.VisibleTools" Target="ProjectionTarget.Human" />
+        </div>
+        @if (State.AvailableAgentActions.Count > 0)
+        {
+            <DynamicComponent Type="ActionComponentResolver.Resolve(State.AvailableAgentActions[0].SourceComponent)"
+                              Parameters="BuildActionParameters(State.AvailableAgentActions[0], ProjectionTarget.Human)" />
+        }
+        <ProjectedResultsPanel Results="State.RecentResults" Target="ProjectionTarget.Human" />
+    </main>
+</body>
+</html>
+
+@code {
+    [Parameter, EditorRequired]
+    public required ContextInterfaceState State { get; set; }
+
+    private static IDictionary<string, object?> BuildActionParameters(AgentActionDescriptor action, ProjectionTarget target) =>
+        new Dictionary<string, object?>
+        {
+            ["Action"] = action,
+            ["Target"] = target
+        };
+
+    private static IDictionary<string, object?> BuildStepParameters(ContextInterfaceState state, ProjectionTarget target) =>
+        new Dictionary<string, object?>
+        {
+            ["State"] = state,
+            ["Target"] = target
+        };
+}

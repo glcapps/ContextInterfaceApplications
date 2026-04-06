@@ -1,0 +1,24 @@
+@namespace ContextInterfaceApplications.Web.Components.Shared
+@using ContextInterfaceApplications.Web.Models
+@using ContextInterfaceApplications.Web.Services
+@inject IActionComponentResolver ActionComponentResolver
+
+<available-actions>
+    @foreach (var action in Actions)
+    {
+        <DynamicComponent Type="ActionComponentResolver.Resolve(action.SourceComponent)"
+                          Parameters="BuildParameters(action, ProjectionTarget.Agent)" />
+    }
+</available-actions>
+
+@code {
+    [Parameter, EditorRequired]
+    public required IReadOnlyList<AgentActionDescriptor> Actions { get; set; }
+
+    private static IDictionary<string, object?> BuildParameters(AgentActionDescriptor action, ProjectionTarget target) =>
+        new Dictionary<string, object?>
+        {
+            ["Action"] = action,
+            ["Target"] = target
+        };
+}

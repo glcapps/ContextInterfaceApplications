@@ -1,0 +1,30 @@
+@namespace ContextInterfaceApplications.Web.Components.Shared
+@using ContextInterfaceApplications.Web.Models
+
+@if (Target == ProjectionTarget.Human)
+{
+    <section>
+        <h2>Current Decision</h2>
+        <p>@State.CurrentStep.Title</p>
+        <p>@State.CurrentStep.Decision</p>
+        <p class="muted">Next valid action: <code>@State.CurrentStep.NextValidAction</code></p>
+    </section>
+}
+else
+{
+    <workflow name="@State.WorkflowName">
+        <step id="@State.CurrentStep.Id">
+            <title>@State.CurrentStep.Title</title>
+            <decision>@State.CurrentStep.Decision</decision>
+            <next-valid-action>@State.CurrentStep.NextValidAction</next-valid-action>
+        </step>
+    </workflow>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public required ContextInterfaceState State { get; set; }
+
+    [Parameter]
+    public ProjectionTarget Target { get; set; }
+}

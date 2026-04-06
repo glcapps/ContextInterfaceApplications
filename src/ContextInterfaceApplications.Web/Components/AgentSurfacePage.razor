@@ -1,0 +1,41 @@
+@namespace ContextInterfaceApplications.Web.Components
+@using ContextInterfaceApplications.Web.Models
+@using ContextInterfaceApplications.Web.Services
+@using ContextInterfaceApplications.Runtime
+@inject IStepComponentResolver StepComponentResolver
+
+<context-interface-application consumer="agent">
+    <application-name>@State.ApplicationName</application-name>
+    <runtime-substrate>
+        <name>@RuntimeSubstrate.Name</name>
+        <package>@RuntimeSubstrate.PackageId</package>
+        <version>@RuntimeSubstrate.Version</version>
+        <role>@RuntimeSubstrate.Role</role>
+        <constraint>@RuntimeSubstrate.Constraint</constraint>
+    </runtime-substrate>
+    @if (StepComponentResolver.Resolve(State.CurrentStep.Id, ProjectionTarget.Agent) is { } stepComponent)
+    {
+        <DynamicComponent Type="stepComponent"
+                          Parameters="BuildStepParameters(State, ProjectionTarget.Agent)" />
+    }
+    <WorkflowPanel State="State" Target="ProjectionTarget.Agent" />
+    <AgentActionContractPanel Actions="State.AvailableAgentActions" />
+    <VisibleToolsPanel Tools="State.VisibleTools" Target="ProjectionTarget.Agent" />
+    <ProjectedResultsPanel Results="State.RecentResults" Target="ProjectionTarget.Agent" />
+    <rendered-at>@State.UpdatedAtUtc.ToString("O")</rendered-at>
+</context-interface-application>
+
+@code {
+    [Parameter, EditorRequired]
+    public required ContextInterfaceState State { get; set; }
+
+    [Parameter, EditorRequired]
+    public required RuntimeSubstrateDescriptor RuntimeSubstrate { get; set; }
+
+    private static IDictionary<string, object?> BuildStepParameters(ContextInterfaceState state, ProjectionTarget target) =>
+        new Dictionary<string, object?>
+        {
+            ["State"] = state,
+            ["Target"] = target
+        };
+}

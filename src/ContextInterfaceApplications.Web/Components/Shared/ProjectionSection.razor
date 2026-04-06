@@ -1,0 +1,51 @@
+@namespace ContextInterfaceApplications.Web.Components.Shared
+@using ContextInterfaceApplications.Web.Models
+
+@if (IsVisible(Definition, Target))
+{
+    if (Target == ProjectionTarget.Human)
+    {
+        <section data-surface-section="@Definition.Id"
+                 data-volatility="@Definition.Volatility"
+                 data-source-component="@Definition.SourceComponent">
+            <h2>@Definition.Title</h2>
+            <p>@Definition.Summary</p>
+        </section>
+    }
+    else
+    {
+        <interface-section id="@Definition.Id"
+                           visibility="@ToVisibilityValue(Definition.Visibility)"
+                           volatility="@Definition.Volatility"
+                           source-component="@Definition.SourceComponent">
+            <title>@Definition.Title</title>
+            <summary>@Definition.Summary</summary>
+        </interface-section>
+    }
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public required SurfaceSectionDefinition Definition { get; set; }
+
+    [Parameter]
+    public ProjectionTarget Target { get; set; }
+
+    private static bool IsVisible(SurfaceSectionDefinition definition, ProjectionTarget target) =>
+        definition.Visibility switch
+        {
+            SurfaceSectionVisibility.Shared => true,
+            SurfaceSectionVisibility.HumanOnly => target == ProjectionTarget.Human,
+            SurfaceSectionVisibility.AgentOnly => target == ProjectionTarget.Agent,
+            _ => false
+        };
+
+    private static string ToVisibilityValue(SurfaceSectionVisibility visibility) =>
+        visibility switch
+        {
+            SurfaceSectionVisibility.Shared => "shared",
+            SurfaceSectionVisibility.HumanOnly => "human-only",
+            SurfaceSectionVisibility.AgentOnly => "agent-only",
+            _ => "shared"
+        };
+}

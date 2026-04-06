@@ -113,6 +113,12 @@ The constraint:
 Rendering must remain **mundane and unsurprising**.
 The complexity belongs in interface design, not in inventing new rendering pipelines.
 
+An important corollary:
+
+The POC must remain legible to ordinary web developers.
+It should feel like extending familiar frontend practice to a second consumer, not like introducing a bespoke agent-specific authoring model.
+The more the implementation resembles normal component composition, conditional rendering, event handling, and multi-target rendering, the more aligned it is with the actual intent.
+
 ---
 
 ## Why XHTML Matters
@@ -165,6 +171,10 @@ If React-like frontend thinking feels like the right analogy, that is a sign tha
 
 This does **not** mean React must be the immediate implementation choice.
 It means the development discipline should resemble frontend engineering more than prompt authoring.
+
+It also means the POC should avoid becoming alien to web developers.
+The goal is not to replace the normal component model with a custom context DSL or an exotic interface tree that developers author directly.
+The goal is to keep ordinary UI authoring at the center and let agent-facing projection, inspection, and replay be derived from that familiar layer.
 
 ---
 
@@ -240,6 +250,13 @@ but it is the **output of an extended UI system**, not the source of truth.
 The core principle:
 
 The system has **one interface definition layer** that can project to multiple consumers (human and agent), rather than separate interface implementations.
+
+Additional guardrail:
+
+The shared interface definition layer should still look and feel like normal web application development.
+If the architecture starts requiring developers to author a second bespoke representation of the interface, the POC has drifted.
+Derived artifacts such as snapshots, replay records, or structured inspection trees are valuable,
+but they must remain downstream of the authored UI/component layer rather than replacing it.
 
 ### 4. Context Window Projection
 
