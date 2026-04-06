@@ -13,9 +13,9 @@
 
 @code {
     [Parameter, EditorRequired]
-    public required IReadOnlyList<AgentActionDescriptor> Actions { get; set; }
+    public required IReadOnlyList<AuthoredActionContract> Actions { get; set; }
 
-    private static IDictionary<string, object?> BuildParameters(AgentActionDescriptor action, ProjectionTarget target) =>
+    private static IDictionary<string, object?> BuildParameters(AuthoredActionContract action, ProjectionTarget target) =>
         new Dictionary<string, object?>
         {
             ["Action"] = action,

@@ -5,18 +5,18 @@ namespace ContextInterfaceApplications.Web.Components.Shared;
 
 public partial class FoundationalDemoAction
 {
-    public static IReadOnlyList<VisibleTool> GetToolsForStep(string stepId) =>
+    public static IReadOnlyList<AuthoredToolContract> GetAuthoredToolsForStep(string stepId) =>
         stepId switch
         {
             "intent-anchoring" =>
             [
-                new VisibleTool(
+                new AuthoredToolContract(
                     "advance-workflow",
                     "Advance Workflow",
                     "application-surface",
                     "Move to the next explicit step in the proof-of-concept flow.",
                     "FoundationalDemoAction"),
-                new VisibleTool(
+                new AuthoredToolContract(
                     "runtime-substrate",
                     "Inspect Runtime Substrate",
                     "runtime",
@@ -25,13 +25,13 @@ public partial class FoundationalDemoAction
             ],
             "shared-state-projection" =>
             [
-                new VisibleTool(
+                new AuthoredToolContract(
                     "advance-workflow",
                     "Advance Workflow",
                     "application-surface",
                     "Move from shared-state projection to replay capture.",
                     "FoundationalDemoAction"),
-                new VisibleTool(
+                new AuthoredToolContract(
                     "inspect-dual-projection",
                     "Inspect Dual Projection",
                     "application-surface",
@@ -41,12 +41,12 @@ public partial class FoundationalDemoAction
             _ => []
         };
 
-    public static IReadOnlyList<AgentActionDescriptor> GetContractsForStep(string stepId) =>
+    public static IReadOnlyList<AuthoredActionContract> GetAuthoredActionsForStep(string stepId) =>
         stepId switch
         {
             "intent-anchoring" =>
             [
-                new AgentActionDescriptor(
+                new AuthoredActionContract(
                     "advance-workflow",
                     "intent-anchoring",
                     "Advance from intent anchoring into the shared-state projection step.",
@@ -55,7 +55,7 @@ public partial class FoundationalDemoAction
             ],
             "shared-state-projection" =>
             [
-                new AgentActionDescriptor(
+                new AuthoredActionContract(
                     "advance-workflow",
                     "shared-state-projection",
                     "Advance from shared-state projection into replay capture.",
@@ -65,8 +65,14 @@ public partial class FoundationalDemoAction
             _ => []
         };
 
+    public static IReadOnlyList<VisibleTool> GetToolsForStep(string stepId) =>
+        GetAuthoredToolsForStep(stepId).Select(tool => tool.ToVisibleTool()).ToArray();
+
+    public static IReadOnlyList<AgentActionDescriptor> GetContractsForStep(string stepId) =>
+        GetAuthoredActionsForStep(stepId).Select(action => action.ToAgentActionDescriptor()).ToArray();
+
     [Parameter, EditorRequired]
-    public required AgentActionDescriptor Action { get; set; }
+    public required AuthoredActionContract Action { get; set; }
 
     [Parameter]
     public ProjectionTarget Target { get; set; }

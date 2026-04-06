@@ -2,6 +2,7 @@
 @using ContextInterfaceApplications.Web.Models
 @using ContextInterfaceApplications.Web.Services
 @inject IActionComponentResolver ActionComponentResolver
+@inject IAuthoredAffordanceResolver AffordanceResolver
 @inject IStepComponentResolver StepComponentResolver
 
 <!DOCTYPE html>
@@ -34,12 +35,12 @@
         }
         <div class="grid">
             <WorkflowPanel State="State" Target="ProjectionTarget.Human" />
-            <VisibleToolsPanel Tools="State.VisibleTools" Target="ProjectionTarget.Human" />
+            <VisibleToolsPanel Tools="AuthoredTools" Target="ProjectionTarget.Human" />
         </div>
-        @if (State.AvailableAgentActions.Count > 0)
+        @if (AuthoredActions.Count > 0)
         {
-            <DynamicComponent Type="ActionComponentResolver.Resolve(State.AvailableAgentActions[0].SourceComponent)"
-                              Parameters="BuildActionParameters(State.AvailableAgentActions[0], ProjectionTarget.Human)" />
+            <DynamicComponent Type="ActionComponentResolver.Resolve(AuthoredActions[0].SourceComponent)"
+                              Parameters="BuildActionParameters(AuthoredActions[0], ProjectionTarget.Human)" />
         }
         <ProjectedResultsPanel Results="State.RecentResults" Target="ProjectionTarget.Human" />
     </main>
@@ -50,7 +51,11 @@
     [Parameter, EditorRequired]
     public required ContextInterfaceState State { get; set; }
 
-    private static IDictionary<string, object?> BuildActionParameters(AgentActionDescriptor action, ProjectionTarget target) =>
+    private IReadOnlyList<AuthoredToolContract> AuthoredTools => AffordanceResolver.GetTools(State.CurrentStep.Id);
+
+    private IReadOnlyList<AuthoredActionContract> AuthoredActions => AffordanceResolver.GetActions(State.CurrentStep.Id);
+
+    private static IDictionary<string, object?> BuildActionParameters(AuthoredActionContract action, ProjectionTarget target) =>
         new Dictionary<string, object?>
         {
             ["Action"] = action,

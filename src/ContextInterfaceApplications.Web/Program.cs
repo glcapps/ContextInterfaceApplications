@@ -10,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorComponents();
 builder.Services.AddSingleton<IWorkflowDefinition, DemoWorkflowDefinition>();
+builder.Services.AddSingleton<IAuthoredAffordanceResolver, DemoAuthoredAffordanceResolver>();
 builder.Services.AddSingleton<IStepComponentResolver, DemoStepComponentResolver>();
 builder.Services.AddSingleton<IStepSurfaceMetadataResolver, DemoStepSurfaceMetadataResolver>();
 builder.Services.AddSingleton<ICanonicalStateStore, WorkflowStateStore>();

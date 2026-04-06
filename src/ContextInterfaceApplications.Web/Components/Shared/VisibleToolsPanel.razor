@@ -28,7 +28,7 @@ else
 
 @code {
     [Parameter, EditorRequired]
-    public required IReadOnlyList<VisibleTool> Tools { get; set; }
+    public required IReadOnlyList<AuthoredToolContract> Tools { get; set; }
 
     [Parameter]
     public ProjectionTarget Target { get; set; }

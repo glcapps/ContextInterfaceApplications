@@ -5,18 +5,18 @@ namespace ContextInterfaceApplications.Web.Components.Shared;
 
 public partial class ReplayCaptureAction
 {
-    public static IReadOnlyList<VisibleTool> GetToolsForStep(string stepId) =>
+    public static IReadOnlyList<AuthoredToolContract> GetAuthoredToolsForStep(string stepId) =>
         stepId switch
         {
             "replay-capture" =>
             [
-                new VisibleTool(
+                new AuthoredToolContract(
                     "inspect-replay",
                     "Inspect Replay Artifact",
                     "application-surface",
                     "Retrieve the latest agent-visible interface snapshot.",
                     "ReplayCaptureAction"),
-                new VisibleTool(
+                new AuthoredToolContract(
                     "reset-workflow",
                     "Reset Workflow",
                     "application-surface",
@@ -26,12 +26,12 @@ public partial class ReplayCaptureAction
             _ => []
         };
 
-    public static IReadOnlyList<AgentActionDescriptor> GetContractsForStep(string stepId) =>
+    public static IReadOnlyList<AuthoredActionContract> GetAuthoredActionsForStep(string stepId) =>
         stepId switch
         {
             "replay-capture" =>
             [
-                new AgentActionDescriptor(
+                new AuthoredActionContract(
                     "reset-workflow",
                     "replay-capture",
                     "Reset the workflow after replay inspection back to the first step.",
@@ -41,8 +41,14 @@ public partial class ReplayCaptureAction
             _ => []
         };
 
+    public static IReadOnlyList<VisibleTool> GetToolsForStep(string stepId) =>
+        GetAuthoredToolsForStep(stepId).Select(tool => tool.ToVisibleTool()).ToArray();
+
+    public static IReadOnlyList<AgentActionDescriptor> GetContractsForStep(string stepId) =>
+        GetAuthoredActionsForStep(stepId).Select(action => action.ToAgentActionDescriptor()).ToArray();
+
     [Parameter, EditorRequired]
-    public required AgentActionDescriptor Action { get; set; }
+    public required AuthoredActionContract Action { get; set; }
 
     [Parameter]
     public ProjectionTarget Target { get; set; }

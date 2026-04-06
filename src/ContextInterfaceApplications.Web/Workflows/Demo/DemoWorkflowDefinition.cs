@@ -6,6 +6,18 @@ namespace ContextInterfaceApplications.Web.Workflows.Demo;
 
 public sealed class DemoWorkflowDefinition : IWorkflowDefinition
 {
+    private readonly IAuthoredAffordanceResolver _affordanceResolver;
+
+    public DemoWorkflowDefinition()
+        : this(new DemoAuthoredAffordanceResolver())
+    {
+    }
+
+    public DemoWorkflowDefinition(IAuthoredAffordanceResolver affordanceResolver)
+    {
+        _affordanceResolver = affordanceResolver;
+    }
+
     public string WorkflowId => "demo-bootstrap";
 
     public ContextInterfaceState CreateInitialState() => BuildState(
@@ -64,7 +76,7 @@ public sealed class DemoWorkflowDefinition : IWorkflowDefinition
             nextState);
     }
 
-    private static ContextInterfaceState BuildState(
+    private ContextInterfaceState BuildState(
         string stepId,
         string title,
         string decision,
@@ -74,8 +86,8 @@ public sealed class DemoWorkflowDefinition : IWorkflowDefinition
             "Context Interface Applications",
             "Proof of Concept Bootstrap",
             new WorkflowStep(stepId, title, decision, nextValidAction),
-            GetVisibleTools(stepId),
-            GetAvailableAgentActions(stepId),
+            _affordanceResolver.GetTools(stepId).Select(tool => tool.ToVisibleTool()).ToArray(),
+            _affordanceResolver.GetActions(stepId).Select(action => action.ToAgentActionDescriptor()).ToArray(),
             new[]
             {
                 new ProjectedResult(
@@ -89,28 +101,4 @@ public sealed class DemoWorkflowDefinition : IWorkflowDefinition
             },
             DateTimeOffset.UtcNow);
     }
-
-    private static IReadOnlyList<VisibleTool> GetVisibleTools(string stepId) =>
-        stepId switch
-        {
-            "intent-anchoring" or "shared-state-projection" => FoundationalDemoAction.GetToolsForStep(stepId),
-            "replay-capture" => ReplayCaptureAction.GetToolsForStep(stepId),
-            _ =>
-            [
-                new VisibleTool(
-                    "advance-workflow",
-                    "Advance Workflow",
-                    "application-surface",
-                    "Move to the next explicit step in the proof-of-concept flow.",
-                    nameof(DemoWorkflowDefinition))
-            ]
-        };
-
-    private static IReadOnlyList<AgentActionDescriptor> GetAvailableAgentActions(string stepId) =>
-        stepId switch
-        {
-            "intent-anchoring" or "shared-state-projection" => FoundationalDemoAction.GetContractsForStep(stepId),
-            "replay-capture" => ReplayCaptureAction.GetContractsForStep(stepId),
-            _ => []
-        };
 }

@@ -11,10 +11,14 @@ public interface IAgentInterfaceSnapshotBuilder
 public sealed class AgentInterfaceSnapshotBuilder : IAgentInterfaceSnapshotBuilder
 {
     private readonly IStepSurfaceMetadataResolver _stepSurfaceMetadataResolver;
+    private readonly IAuthoredAffordanceResolver _authoredAffordanceResolver;
 
-    public AgentInterfaceSnapshotBuilder(IStepSurfaceMetadataResolver stepSurfaceMetadataResolver)
+    public AgentInterfaceSnapshotBuilder(
+        IStepSurfaceMetadataResolver stepSurfaceMetadataResolver,
+        IAuthoredAffordanceResolver authoredAffordanceResolver)
     {
         _stepSurfaceMetadataResolver = stepSurfaceMetadataResolver;
+        _authoredAffordanceResolver = authoredAffordanceResolver;
     }
 
     public InterfaceSnapshot Build(ContextInterfaceState state, RuntimeSubstrateDescriptor substrate)
@@ -22,6 +26,14 @@ public sealed class AgentInterfaceSnapshotBuilder : IAgentInterfaceSnapshotBuild
         var sectionNodes = _stepSurfaceMetadataResolver
             .GetSections(state.CurrentStep.Id, ProjectionTarget.Agent)
             .Select(BuildSectionNode)
+            .ToArray();
+        var toolNodes = _authoredAffordanceResolver
+            .GetTools(state.CurrentStep.Id)
+            .Select(BuildToolNode)
+            .ToArray();
+        var actionNodes = _authoredAffordanceResolver
+            .GetActions(state.CurrentStep.Id)
+            .Select(BuildActionNode)
             .ToArray();
 
         var workflowNode = new InterfaceNode(
@@ -53,14 +65,14 @@ public sealed class AgentInterfaceSnapshotBuilder : IAgentInterfaceSnapshotBuild
                     "Visible Tools",
                     null,
                     [],
-                    state.VisibleTools.Select(BuildToolNode).ToArray()),
+                    toolNodes),
                 new InterfaceNode(
                     "available-actions",
                     "available-actions",
                     "Available Actions",
                     null,
                     [],
-                    state.AvailableAgentActions.Select(BuildActionNode).ToArray()),
+                    actionNodes),
                 new InterfaceNode(
                     "projected-results",
                     "projected-results",
@@ -102,7 +114,7 @@ public sealed class AgentInterfaceSnapshotBuilder : IAgentInterfaceSnapshotBuild
             DateTimeOffset.UtcNow);
     }
 
-    private static InterfaceNode BuildToolNode(VisibleTool tool) =>
+    private static InterfaceNode BuildToolNode(AuthoredToolContract tool) =>
         new(
             "tool",
             tool.Id,
@@ -114,7 +126,7 @@ public sealed class AgentInterfaceSnapshotBuilder : IAgentInterfaceSnapshotBuild
             ],
             []);
 
-    private static InterfaceNode BuildActionNode(AgentActionDescriptor action) =>
+    private static InterfaceNode BuildActionNode(AuthoredActionContract action) =>
         new(
             "action",
             action.ActionId,

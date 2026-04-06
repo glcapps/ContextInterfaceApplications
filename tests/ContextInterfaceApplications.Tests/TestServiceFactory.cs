@@ -11,6 +11,7 @@ internal static class TestServiceFactory
     {
         var builder = WebApplication.CreateBuilder();
         builder.Services.AddRazorComponents();
+        builder.Services.AddSingleton<IAuthoredAffordanceResolver, DemoAuthoredAffordanceResolver>();
         builder.Services.AddSingleton<IActionComponentResolver, ActionComponentResolver>();
         builder.Services.AddSingleton<IStepComponentResolver, DemoStepComponentResolver>();
         builder.Services.AddSingleton<IStepSurfaceMetadataResolver, DemoStepSurfaceMetadataResolver>();
