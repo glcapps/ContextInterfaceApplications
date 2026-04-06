@@ -15,6 +15,7 @@ internal static class TestServiceFactory
         builder.Services.AddSingleton<IActionComponentResolver, ActionComponentResolver>();
         builder.Services.AddSingleton<IStepComponentResolver, DemoStepComponentResolver>();
         builder.Services.AddSingleton<IStepSurfaceMetadataResolver, DemoStepSurfaceMetadataResolver>();
+        builder.Services.AddSingleton<ICurrentInterfaceProjectionResolver, CurrentInterfaceProjectionResolver>();
         builder.Services.AddSingleton<IAgentInterfaceSnapshotBuilder, AgentInterfaceSnapshotBuilder>();
         var app = builder.Build();
         return app.Services;

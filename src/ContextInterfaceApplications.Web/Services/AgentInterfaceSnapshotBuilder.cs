@@ -10,29 +10,24 @@ public interface IAgentInterfaceSnapshotBuilder
 
 public sealed class AgentInterfaceSnapshotBuilder : IAgentInterfaceSnapshotBuilder
 {
-    private readonly IStepSurfaceMetadataResolver _stepSurfaceMetadataResolver;
-    private readonly IAuthoredAffordanceResolver _authoredAffordanceResolver;
+    private readonly ICurrentInterfaceProjectionResolver _projectionResolver;
 
     public AgentInterfaceSnapshotBuilder(
-        IStepSurfaceMetadataResolver stepSurfaceMetadataResolver,
-        IAuthoredAffordanceResolver authoredAffordanceResolver)
+        ICurrentInterfaceProjectionResolver projectionResolver)
     {
-        _stepSurfaceMetadataResolver = stepSurfaceMetadataResolver;
-        _authoredAffordanceResolver = authoredAffordanceResolver;
+        _projectionResolver = projectionResolver;
     }
 
     public InterfaceSnapshot Build(ContextInterfaceState state, RuntimeSubstrateDescriptor substrate)
     {
-        var sectionNodes = _stepSurfaceMetadataResolver
-            .GetSections(state.CurrentStep.Id, ProjectionTarget.Agent)
+        var projection = _projectionResolver.Resolve(state, ProjectionTarget.Agent);
+        var sectionNodes = projection.Sections
             .Select(BuildSectionNode)
             .ToArray();
-        var toolNodes = _authoredAffordanceResolver
-            .GetTools(state.CurrentStep.Id)
+        var toolNodes = projection.Tools
             .Select(BuildToolNode)
             .ToArray();
-        var actionNodes = _authoredAffordanceResolver
-            .GetActions(state.CurrentStep.Id)
+        var actionNodes = projection.Actions
             .Select(BuildActionNode)
             .ToArray();
 

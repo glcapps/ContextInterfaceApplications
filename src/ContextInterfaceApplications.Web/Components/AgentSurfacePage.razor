@@ -2,7 +2,7 @@
 @using ContextInterfaceApplications.Web.Models
 @using ContextInterfaceApplications.Web.Services
 @using ContextInterfaceApplications.Runtime
-@inject IAuthoredAffordanceResolver AffordanceResolver
+@inject ICurrentInterfaceProjectionResolver ProjectionResolver
 @inject IStepComponentResolver StepComponentResolver
 
 <context-interface-application consumer="agent">
@@ -20,8 +20,8 @@
                           Parameters="BuildStepParameters(State, ProjectionTarget.Agent)" />
     }
     <WorkflowPanel State="State" Target="ProjectionTarget.Agent" />
-    <AgentActionContractPanel Actions="AuthoredActions" />
-    <VisibleToolsPanel Tools="AuthoredTools" Target="ProjectionTarget.Agent" />
+    <AgentActionContractPanel Actions="Projection.Actions" />
+    <VisibleToolsPanel Tools="Projection.Tools" Target="ProjectionTarget.Agent" />
     <ProjectedResultsPanel Results="State.RecentResults" Target="ProjectionTarget.Agent" />
     <rendered-at>@State.UpdatedAtUtc.ToString("O")</rendered-at>
 </context-interface-application>
@@ -33,9 +33,7 @@
     [Parameter, EditorRequired]
     public required RuntimeSubstrateDescriptor RuntimeSubstrate { get; set; }
 
-    private IReadOnlyList<AuthoredToolContract> AuthoredTools => AffordanceResolver.GetTools(State.CurrentStep.Id);
-
-    private IReadOnlyList<AuthoredActionContract> AuthoredActions => AffordanceResolver.GetActions(State.CurrentStep.Id);
+    private CurrentInterfaceProjection Projection => ProjectionResolver.Resolve(State, ProjectionTarget.Agent);
 
     private static IDictionary<string, object?> BuildStepParameters(ContextInterfaceState state, ProjectionTarget target) =>
         new Dictionary<string, object?>

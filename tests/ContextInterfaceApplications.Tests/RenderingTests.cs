@@ -80,8 +80,9 @@ public sealed class RenderingTests
             "Runtime substrate for model execution and tool invocation.",
             "The framework is present as infrastructure only; application semantics remain in canonical state and authored surfaces.");
         var builder = new AgentInterfaceSnapshotBuilder(
-            new DemoStepSurfaceMetadataResolver(),
-            new DemoAuthoredAffordanceResolver());
+            new CurrentInterfaceProjectionResolver(
+                new DemoStepSurfaceMetadataResolver(),
+                new DemoAuthoredAffordanceResolver()));
 
         var snapshot = builder.Build(state, substrate);
 
@@ -107,5 +108,22 @@ public sealed class RenderingTests
         Assert.Contains(actionsNode.Children, child => child.Properties.Any(property => property is { Name: "source-component", Value: "FoundationalDemoAction" }));
         Assert.NotEmpty(resultsNode.Children);
         Assert.Contains(runtimeNode.Properties, property => property is { Name: "package-id", Value: "Microsoft.Agents.Hosting.AspNetCore" });
+    }
+
+    [Fact]
+    public void CurrentInterfaceProjectionResolver_ComposesCurrentVisibleProjection()
+    {
+        var state = new DemoWorkflowDefinition().CreateInitialState();
+        var resolver = new CurrentInterfaceProjectionResolver(
+            new DemoStepSurfaceMetadataResolver(),
+            new DemoAuthoredAffordanceResolver());
+
+        var projection = resolver.Resolve(state, ProjectionTarget.Agent);
+
+        Assert.Equal(ProjectionTarget.Agent, projection.Target);
+        Assert.Contains(projection.Sections, section => section.Id == "agent-only-illustration");
+        Assert.DoesNotContain(projection.Sections, section => section.Id == "human-only-illustration");
+        Assert.Contains(projection.Tools, tool => tool.Id == "runtime-substrate");
+        Assert.Contains(projection.Actions, action => action.ActionId == "advance-workflow");
     }
 }

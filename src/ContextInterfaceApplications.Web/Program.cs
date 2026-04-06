@@ -13,6 +13,7 @@ builder.Services.AddSingleton<IWorkflowDefinition, DemoWorkflowDefinition>();
 builder.Services.AddSingleton<IAuthoredAffordanceResolver, DemoAuthoredAffordanceResolver>();
 builder.Services.AddSingleton<IStepComponentResolver, DemoStepComponentResolver>();
 builder.Services.AddSingleton<IStepSurfaceMetadataResolver, DemoStepSurfaceMetadataResolver>();
+builder.Services.AddSingleton<ICurrentInterfaceProjectionResolver, CurrentInterfaceProjectionResolver>();
 builder.Services.AddSingleton<ICanonicalStateStore, WorkflowStateStore>();
 builder.Services.AddSingleton<IActionComponentResolver, ActionComponentResolver>();
 builder.Services.AddSingleton<IContextToolInvoker, ContextToolInvoker>();
