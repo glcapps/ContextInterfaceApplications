@@ -54,7 +54,7 @@
 ## Context Interface Applications
 	13.	What Is a Context Interface Application?
 
-	A Context Interface Application designs the model’s working context as the primary interface. It defines what is visible, how it is structured, what actions are allowed, how workflows advance, and which state persists across steps. The system renders context per step, not a single static prompt. State, tools, goals, constraints, and transitions are explicit nodes, not implicit text. The application surface is the composed context, not just UI or API endpoints.
+	A Context Interface Application designs the model’s working context as the primary interface. It defines what is visible, how it is structured, what actions are allowed, how workflows advance, and which state persists across steps. The system renders context per step, not a single static prompt. State, tools, goals, constraints, transitions, and relevant results are explicit nodes, not implicit text. The application surface is the composed context, not just UI or API endpoints.
 
 	14.	The Interface as Context, Not UI or API
 
@@ -75,7 +75,7 @@
 
 	18.	The ForageMap DOM: Structure, State, and Workflow
 
-	Represent context as a structured tree: goals, steps, tasks, tools, notes, constraints, and state snapshots. Nodes are addressable, composable, diffable, and selectively renderable. Build per-step views by selecting subtrees, ordering nodes, applying summarization, and projecting only relevant state. Structure enables inspection, partial updates, reuse, versioning, and replay. Serialization to tokens is a render step, not the source of truth.
+	Represent context as a structured tree: goals, steps, tasks, tools, notes, constraints, state snapshots, and relevant results. Nodes are addressable, composable, diffable, and selectively renderable. Build per-step views by selecting subtrees, ordering nodes, applying summarization, and projecting only relevant state and tool outputs directly into the context window. Structure enables inspection, partial updates, reuse, versioning, and replay. Serialization to tokens is a render step, not the source of truth.
 
 	19.	Workflow as Interface: Navigating a Map Instead of a UI
 
@@ -184,7 +184,7 @@
 
 	44.	Rendering the Human DOM and the Context Interface Together
 
-	Render human DOM and context interface from shared state with explicit mappings and projection rules. Define which nodes project to UI, which to context, and which remain internal. Keep projections deterministic, idempotent, and step-scoped. Detect and resolve divergence. Treat context render as a first-class pipeline alongside UI render, with snapshots, diffs, and replay.
+	Render human DOM and context interface from shared state with explicit mappings and projection rules. Define which nodes project to UI, which to context, and which remain internal. Keep projections deterministic, idempotent, and step-scoped. Detect and resolve divergence. Treat context render as a first-class pipeline alongside UI render, with snapshots, diffs, and replay. The agent-facing visible surface should be projected directly into the context window rather than left implicit in surrounding prose.
 
 	45.	Filesystems, Databases, and Context State Stores
 
@@ -192,7 +192,7 @@
 
 	46.	Tool Execution Surfaces: APIs, SQL, Scripts, and Components
 
-	Tool execution spans APIs, SQL, scripts, components, and local or remote services. Define contracts (inputs, outputs, side effects, failure modes), validate inputs, scope availability per step, and isolate execution where needed. Enforce idempotency, timeouts, permissions, retries, and audit logs. Surface results, errors, metadata, and resulting state changes as structured nodes for subsequent steps. Tools are execution surfaces inside the interface, not free-form escapes from it. A well-formed tool narrows choices, makes side effects legible, and returns state in a form the next step can safely consume.
+	Tool execution spans APIs, SQL, scripts, components, and local or remote services. Define contracts (inputs, outputs, side effects, failure modes), validate inputs, scope availability per step, and isolate execution where needed. Enforce idempotency, timeouts, permissions, retries, and audit logs. Surface results, errors, metadata, and resulting state changes as structured nodes for subsequent steps. Tools are execution surfaces inside the interface, not free-form escapes from it. A well-formed tool narrows choices, makes side effects legible, and returns state in a form the next step can safely consume. Tool results that are part of the current interface surface should be projected directly into the context window, not left only in external logs or hidden transport payloads.
 
 ## Forward Outlook
 	47.	Standardizing Context Interfaces
